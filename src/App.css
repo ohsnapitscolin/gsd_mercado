@@ -1,0 +1,251 @@
+html {
+  height: 100%;
+  min-height: 100%;
+}
+
+body {
+  display: inline-block;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+[data-reactroot] {
+  width: 100%;
+  height: 100%
+}
+
+.home {
+  height: 100%;
+  width: 100%;
+  position:relative;
+}
+
+.content {
+  width: 100%;
+  height: 100%;
+}
+
+#main_content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.hidden {
+  display: none;
+}
+
+.lines {
+  fill: none;
+  stroke: gray;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+#geo_map_hover {
+  visibility: hidden;
+  position: absolute;
+  top: 300px;
+  left: 300px;
+  width: 385px;
+  height: 230px;
+  padding: 5px;
+  background-color: white;
+  z-index: 100;
+  opacity: .95;
+ /* border-color: lightgrey;
+  border-style: solid;
+  border-width: 2px;*/
+  box-shadow: 2px 2px 10px 3px lightgrey;
+  overflow-y: scroll;
+}
+
+.navigation {
+  width: 100%;
+  height: auto;
+  z-index: 150;
+}
+
+.story_manager {
+  height: 100%;
+  width: 100%;
+}
+
+.story {
+  position: relative;
+  height: 100%;
+}
+
+.storyTitle {
+  width: 100%;
+  opacity: 1;
+}
+
+.story_content {
+  position: relative;
+  height: 100%;
+}
+
+.marker {
+  padding: 5px;
+  color: grey;
+  background-color: lightgrey;
+  max-width: 100px;
+  overflow-x: hidden;
+}
+
+.marker:hover {
+  cursor: pointer;
+}
+
+.marker.hovered {
+  color: black;
+}
+
+.story_scroll {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: mandatory;
+}
+
+.story_scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.segment_controller_wrapper {
+  position: absolute;
+  top:0;
+  right:0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+}
+
+.story_segments {
+  height: 100%;
+}
+
+.image_segment_image {
+  height: 100%;
+  width: 100%;
+}
+
+.video_segment_video {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.video_segment {
+  height: 100%;
+}
+
+.text_segment {
+  height: 100%;
+}
+
+.segment_control {
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-radius: 50%;
+  margin: 10px;
+}
+
+.segment_control:hover {
+  background-color: lightgrey;
+}
+
+.segment_control.focused {
+  width: 15px;
+  height: 15px;
+}
+
+
+
+.map_manager {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  z-index: 0;
+}
+
+.grid_manager {
+  width: 50%;
+  height: 100%;
+  background-color: #F0F0F0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow-y: scroll;
+  z-index: 1;
+}
+
+.geo_map_manager {
+  width: 100%;
+  height: 100%;
+}
+
+.info_map_manager {
+  width: 100%;
+  height: 100%;
+}
+
+.geo_map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#geo_mapbox {
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
+.points {
+  stroke: blue;
+  fill: blue;
+  stroke-opacity: 1;
+  stroke-width: 5px;
+  /*vector-effect: non-scaling-stroke;*/
+}
+
+.points:hover, .points.hovered {
+  stroke: red;
+  fill: red;
+  stroke-width: 8px;
+  cursor: pointer;
+}
+
+.selection_node {
+  color: white;
+  padding: 15px;
+  width: 150px;
+  height: 100px;
+  margin: 25px;
+  background-color: grey;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.selection_node.hovered {
+  background-color: lightgrey;
+}
+

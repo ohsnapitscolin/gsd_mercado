@@ -1,0 +1,12 @@
+{
+	"geojsons": [
+		{
+			"file": "points",
+			"type": "points"
+		},
+		{
+			"file": "lines",
+			"type": "lines"
+		}
+	]
+}

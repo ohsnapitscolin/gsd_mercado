@@ -1,0 +1,41 @@
+{
+	"type": "story",
+	"id": 6,
+	"segments": [
+		{
+			"type": "image",
+			"name": "Image 1 Test!",
+			"src": "unique_id_1",
+			"description": "This is an image!",
+			"node": "19id"
+		},
+		{
+			"type": "video",
+			"name": "Video Test!",
+			"src": "https://www.youtube.com/embed/kJQP7kiw5Fk",
+			"node": "11id"
+		},
+		{
+			"type": "image",
+			"name": "Image 2 Test!",
+			"src": "unique_id_2",
+			"description": "This is an image also!",
+			"node": "12id"
+		},
+				{
+			"type": "image",
+			"name": "Image 2 Test!",
+			"src": "unique_id_2",
+			"description": "This is an image also!",
+			"node": "54id"
+		}
+	],
+	"images": {
+		"unique_id_1": "test_image1.jpg",
+		"unique_id_2": "test_image2.jpg",
+		"unique_id_3": "test_image1.jpg",
+		"unique_id_4": "test_image2.jpg",
+		"unique_id_5": "test_image1.jpg",
+		"unique_id_6": "test_image2.jpg"
+	}
+}

@@ -1,0 +1,28 @@
+{
+  "name": "gsd_mercado",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "d3": "^4.11.0",
+    "firebase": "^4.5.0",
+    "jquery": "^3.2.1",
+    "json-editor": "^0.7.28",
+    "mapbox-gl": "^0.39.1",
+    "pubsub-js": "^1.5.7",
+    "react": "^15.6.2",
+    "react-dom": "^15.6.2",
+    "react-router-dom": "^4.2.2",
+    "react-scripts": "1.0.11",
+    "topojson-client": "^3.0.0",
+    "webpack": "^3.6.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "react-hot-loader": "^3.0.0-beta.7"
+  }
+}

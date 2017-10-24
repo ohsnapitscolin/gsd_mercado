@@ -1,0 +1,130 @@
+[
+	{
+		"id": "tlatelolco",
+		"category": "lightblue"
+	},
+	{
+		"id": "formal_commercial",
+		"category": "lightblue"
+	},
+	{
+		"id": "informal_commercial",
+		"category": "lightblue"
+	},
+	{
+		"id": "individual",
+		"category": "lightblue"
+	},
+	{
+		"id": "public_park",
+		"category": "lightblue"
+	},
+	{
+		"id": "tlatelolco_electric_car",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "montones",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "chatarrero_perifoneo",
+		"category": "pink"
+	},
+	{
+		"id": "formal_street_sweeper",
+		"category": "pink"
+	},
+	{
+		"id": "electric_car",
+		"category": "pink"
+	},
+	{
+		"id": "carrero_informal_collector",
+		"category": "pink"
+	},
+	{
+		"id": "pepenadores",
+		"category": "pink"
+	},
+	{
+		"id": "barrendero_cart_storage",
+		"category": "orange"
+	},
+	{
+		"id": "mercado_de_trueque",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "chacharrero",
+		"category": "pink"
+	},
+	{
+		"id": "small_recollection_center",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "tianguis",
+		"category": "yellow"
+	},
+	{
+		"id": "trash_truck_storage",
+		"category": "orange"
+	},
+	{
+		"id": "trash_truck",
+		"category": "#00ced1"
+	},
+	{
+		"id": "tlatelolco_transfer_station",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "paper_nomadic_buyer",
+		"category": "pink"
+	},
+	{
+		"id": "pet_nomadic_buyer",
+		"category": "pink"
+	},
+	{
+		"id": "other_plastic_nomadic_buyer",
+		"category": "pink"
+	},
+	{
+		"id": "metal_nomadic_buyer",
+		"category": "pink"
+	},
+	{
+		"id": "transfer_station",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "paper_medium_recollection_center",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "plastic_medium_recollection_center",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "metal_medium_recollection_center",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "plastic_large_recollection_center",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "paper_large_recollection_center",
+		"category": "#3b72cc"
+	},
+	{
+		"id": "foundry_ferrous",
+		"category": "white"
+	},
+	{
+		"id": "foundry_non_ferrous",
+		"category": "white"
+	}
+]
