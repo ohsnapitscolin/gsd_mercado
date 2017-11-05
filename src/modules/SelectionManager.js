@@ -3,9 +3,7 @@ import React, { Component } from 'react';
 import PubSub from 'pubsub-js';
 
 import {
-	ContentTypeEnum,
 	FilterTypeEnum,
-	FILTER_TYPE_CHANGE_EVENT,
 	HOVER_NODE_EVENT,
 	UNHOVER_NODE_EVENT } from './ContentManager';
 // import Selection from './Selection.js'
@@ -16,13 +14,7 @@ class SelectionManager extends Component {
 		super(props)
 		this.contentManager_ = props.contentManager;
 
-		this.state = {
-			filterType: FilterTypeEnum.NONE
-		}
-
 		this.tokens_ = [];
-		this.tokens_.push(PubSub.subscribe(
-				FILTER_TYPE_CHANGE_EVENT, this.handleFilterTypeChange.bind(this)));
 		this.tokens_.push(PubSub.subscribe(
 				HOVER_NODE_EVENT, this.handleHoverNode.bind(this)));
 		this.tokens_.push(PubSub.subscribe(
@@ -42,11 +34,9 @@ class SelectionManager extends Component {
     $('.selection_node').each(function() {
     	const nodeId = $(this).attr('id').split('_')[1];
     	$(this).hover(() => {
-    		thisSelectionManager.contentManager_.hoverNode(
-	    			nodeId, ContentTypeEnum.GRID);
+    		thisSelectionManager.contentManager_.hoverNode(nodeId);
     	}, () => {
-    		thisSelectionManager.contentManager_.unhoverNode(
-	    			nodeId, ContentTypeEnum.GRID);
+    		thisSelectionManager.contentManager_.unhoverNode(nodeId);
     	});
     });
   }
@@ -57,23 +47,21 @@ class SelectionManager extends Component {
   }
 
   handleUnhoverNode(e, data) {
-  	console.log('unhovered');
 		const $selectionItem = $('#selection_' + data.nodeId);
 		$selectionItem.removeClass('hovered');
   }
 
-	handleFilterTypeChange(e, filterType) {
-		this.setState({ filterType: filterType });
+	handleFilterTypeChange(e, data) {
 	}
 
 	applyFilter(nodes) {
-		if (this.state.filterType == FilterTypeEnum.NONE) {
+		if (this.props.filterType == FilterTypeEnum.NONE) {
 			return nodes;
 		}
 
 		let updatedNodes = [];
 		nodes.forEach((node) => {
-			if(this.state.filterType == FilterTypeEnum.POPUPINFO) {
+			if(this.props.filterType == FilterTypeEnum.POPUPINFO) {
 				if (node.PopupInfo != null) {
 					updatedNodes.push(node);
 				}
@@ -88,33 +76,37 @@ class SelectionManager extends Component {
 				<button
 	 		 			type="button"
 	 		 			onClick={() => {
-	 		 				this.contentManager_.setFilterType(FilterTypeEnum.NONE);
+	 		 				this.contentManager_.updateActiveFilterType(
+	 		 						FilterTypeEnum.NONE);
 	 		 			}}>
 		 			None!
 	 			</button>
 				<button
 	 		 			type="button"
 	 		 			onClick={() => {
-	 		 				this.contentManager_.setFilterType(FilterTypeEnum.RED);
+	 		 				this.contentManager_.updateActiveFilterType(
+	 		 						FilterTypeEnum.RED);
 	 		 			}}>
 		 			Red!
 	 			</button>
 	 			<button
 	 		 			type="button"
 	 		 			onClick={() => {
-	 		 				this.contentManager_.setFilterType(FilterTypeEnum.GREEN);
+	 		 				this.contentManager_.updateActiveFilterType(
+	 		 						FilterTypeEnum.GREEN);
 	 		 			}}>
 		 			Green!
 	 			</button>
 	 			<button
 	 		 			type="button"
 	 		 			onClick={() => {
-	 		 				this.contentManager_.setFilterType(FilterTypeEnum.POPUPINFO);
+	 		 				this.contentManager_.updateActiveFilterType(
+ 		 							FilterTypeEnum.POPUPINFO);
 	 		 			}}>
 		 			PopupInfo!
 	 			</button>
 	 			<div>
-	 				{this.state.filterType}
+	 				{this.props.filterType}
 	 			</div>
 			</div>
 		)
@@ -131,7 +123,7 @@ class SelectionManager extends Component {
         		className="selection_node"
         		id={'selection_' + nodeId}
         		onClick={() => {
-        			this.contentManager_.clickNode(nodeId, ContentTypeEnum.GRID);
+        			this.contentManager_.updateActiveNodeId(nodeId);
         		}}>
         	{node.getName()}
         </div>

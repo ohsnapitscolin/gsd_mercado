@@ -3,7 +3,8 @@ import $ from 'jquery';
 
 const StoryStateEnum = {
 	LOADING: 0,
-	LOADED: 1
+	IMAGES_LOADED: 1,
+	LOADED: 2
 }
 
 
@@ -14,10 +15,10 @@ class Story extends Component {
 		this.contentManager_ = props.contentManager;
 
 		this.state = {
-			state: StoryStateEnum.LOADING
+			loadingState: StoryStateEnum.LOADING
 		}
 
-		this.buffered = false;
+		this.bufferTime_ = 500;
 		this.images_ = new Map();
 
 		try {
@@ -35,7 +36,10 @@ class Story extends Component {
 					props.storyId, imageId, this.story_.images[imageId])
 			);
 		}
-		Promise.all(this.resourcePromises_).then(() => { this.setLoaded(); });
+		Promise.all(this.resourcePromises_).then(() => {
+			this.setImagesLoaded();
+			setTimeout(() => { this.setLoaded() }, this.bufferTime_)
+		});
 	}
 
 	importImage(oid, imageId, imageName) {
@@ -51,7 +55,9 @@ class Story extends Component {
 		$('.story_scroll').on("scroll", () => {
 			this.updateControllerHover();
 		});
-		this.updateControllerHover();
+		if (this.state.loadingState == StoryStateEnum.LOADED) {
+			this.updateControllerHover();
+		}
 	}
 
 	updateControllerHover() {
@@ -66,7 +72,7 @@ class Story extends Component {
 			if (this.currentSegmentId_ >= 0) {
 				const activeNodeId = this.story_.segments[this.currentSegmentId_].node;
 				console.log(activeNodeId);
-				this.contentManager_.setActiveNode(activeNodeId);
+				this.contentManager_.setFocusedNodeId(activeNodeId);
 			}
 		}
 	}
@@ -103,16 +109,22 @@ class Story extends Component {
 		return segments;
 	}
 
-	setLoaded() {
+	setImagesLoaded() {
 		this.setState({
-			state: StoryStateEnum.LOADED
+			loadingState: StoryStateEnum.IMAGES_LOADED
 		});
 	}
 
-	renderLoaded() {
-		console.log('renderLoaded');
+	setLoaded() {
+		this.setState({
+			loadingState: StoryStateEnum.LOADED
+		});
+	}
+
+	renderSegments() {
 		var segments = [];
 		var segmentsController = [];
+
 		for (var i = 0; i < this.story_.segments.length; i++) {
 			var segment = this.story_.segments[i];
 			if (segment.type == 'image') {
@@ -182,7 +194,7 @@ class Story extends Component {
 		);
 	}
 
-	renderLoading() {
+	maybeRenderLoading() {
 		return (
 			<div>
 				<img src={require("../resources/loading.gif")}/>
@@ -197,8 +209,7 @@ class Story extends Component {
 					{this.props.storyId}
 				</div>
 				<div className="story_content">
-					{this.state.state == StoryStateEnum.LOADING ?
-							this.renderLoading() : this.renderLoaded()}
+					{ this.renderSegments() }
 				</div>
 			</div>
 		);

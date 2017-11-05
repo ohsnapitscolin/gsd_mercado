@@ -25,7 +25,7 @@
 	},
 	{
 		"nodeId":"4id",
-		"geoId":4,
+		"geoId":"1line_id",
 		"infoId":"individual",
 		"name":"Paper Green"
 	},

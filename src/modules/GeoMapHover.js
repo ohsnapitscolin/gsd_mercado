@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
 
-import { ContentTypeEnum } from './ContentManager.js';
-
 class GeoMapHover extends Component {
 	constructor(props) {
 		super(props);
@@ -49,7 +47,7 @@ class GeoMapHover extends Component {
 		if (this.state.visible) {
 			const node = this.state.node;
 			this.setState({ visible: false });
-			this.contentManager_.unhoverNode(node.getId(), ContentTypeEnum.MAP);
+			this.contentManager_.unhoverNode(node.getId());
 		}
 	}
 
@@ -86,7 +84,7 @@ class GeoMapHover extends Component {
 			return;
 		}
 		this.unclick();
-		this.contentManager_.clickNode(node.getId(), ContentTypeEnum.MAP);
+		this.contentManager_.updateActiveNodeId(node.getId());
 	}
 
 	render() {

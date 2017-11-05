@@ -1,29 +1,39 @@
 import $ from 'jquery';
 import React, { Component } from 'react';
 
-class Node {
-	constructor(nodeObject) {
-		this.nodeId_ = nodeObject.nodeId;
-		this.geoId_ = nodeObject.geoId;
-		this.typeId_ = nodeObject.infoId;
-		this.name_ = nodeObject.name;
+import { GridTypeEnum } from './GridManager.js'
+
+class NodeRename extends Component {
+	constructor(props) {
+		super(props)
+		this.contentManager_ = props.contentManager;
 	}
 
-	getId() {
-		return this.nodeId_;
-	}
+	render() {
+		let storyButtons = [];
+		const storyNodes =
+				this.contentManager_.getStoriesForNodeId(this.props.nodeId);
+		for (let i = 0; i < storyNodes.length; i++) {
+			const storyNode = storyNodes[i];
+			storyButtons.push(
+				<button onClick={() => {
+					this.contentManager_.updateActiveStoryId(storyNode.getId());
+				}}>
+					{storyNode.getName()}
+				</button>
+			);
+		}
 
-	getGeoId() {
-		return this.geoId_;
-	}
-
-	getTypeId() {
-		return this.typeId_;
-	}
-
-	getName() {
-		return this.name_
+		return (
+			<div className="node">
+				<div>
+					{this.props.nodeId}
+					{storyButtons}
+				</div>
+			</div>
+		);
 	}
 }
 
-export default Node;
+export default NodeRename;
+

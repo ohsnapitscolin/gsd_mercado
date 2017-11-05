@@ -33,28 +33,11 @@ class StoryManager extends Component {
 	}
 
 	clickStory(storyId) {
+		this.contentManager_.clickStory(storyId);
 		this.setState({ type:StoryTypeEnum.STORY });
 	}
 
-	renderNode(nodeId) {
-		let storyButtons = [];
-		const storyNodes =
-			this.contentManager_.getStoriesForNodeId(nodeId);
-		for (let i = 0; i < storyNodes.length; i++) {
-			const storyNode = storyNodes[i];
-			storyButtons.push(
-				<button onClick={() => { this.clickStory(storyNode.getId()); }}>
-					{storyNode.getName()}
-				</button>
-			);
-		}
-		return (
-			<div>
-				{nodeId}
-				{storyButtons}
-			</div>
-		);
-	}
+
 
 	render() {
 		return (

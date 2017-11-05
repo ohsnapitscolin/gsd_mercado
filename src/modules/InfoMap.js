@@ -19,6 +19,8 @@ class InfoMap extends Component {
     this.mapHover_ = null;
     this.moveCounter_ = 0;
 
+    this.ignoreHoverChanges = false;
+
     this.graph_ = require('../resources/graph.json');
     console.log(this.graph_);
 
@@ -33,15 +35,17 @@ class InfoMap extends Component {
     }
   }
 
+  setIgnoreHoverChanges(ignoreHoverChnages) {
+    this.ignoreHoverChnages_ = ignoreHoverChnages;
+  }
+
   addPoints(node, color) {
     var el = document.createElement('div');
 
-    $(el).attr('id', 'type-' + node.getId());
-    $(el).attr('class', 'marker');
+    $(el).attr('id', 'type-' + node.getTypeId());
+    $(el).attr('class', 'info_marker');
 
-
-
-    const id = node.getId();
+    const id = node.getTypeId();
     $(el).append(id);
 
     const thisInfoMap = this;
@@ -51,6 +55,10 @@ class InfoMap extends Component {
     }, function() {
       const nodeId = $(this).attr('id').split('-')[1];
       thisInfoMap.unhover(nodeId);
+    });
+    $(el).click(function() {
+      const nodeId = $(this).attr('id').split('-')[1];
+      thisInfoMap.contentManager_.updateActiveTypeId(nodeId);
     });
 
     new mapboxgl.Marker(el)
@@ -77,27 +85,64 @@ class InfoMap extends Component {
     this.unhover(typeId);
   }
 
-  hover(nodeId) {
-    let nodesToHover = [nodeId];
+
+  hover(typeId) {
+    if (this.ignoreHoverChnages_) {
+      return;
+    }
+    this.focusType(typeId);
+  }
+
+  focusTypes(typeIds, activeConnectionsOnly) {
     for (var path in this.pathGroups_) {
       this.pathGroups_[path].style("stroke", (d) => {
-        if (d.properties.startNode == nodeId) {
-          nodesToHover.push(d.properties.endNode);
-          return "black";
-        } else if (d.properties.endNode == nodeId) {
-          nodesToHover.push(d.properties.startNode);
-          return "black";
-        } else {
-          return "";
+        const startNode = d.properties.startNode;
+        const endNode = d.properties.endNode;
+
+        let focusPath = false;
+        if (typeIds.includes(startNode)) {
+          if (!activeConnectionsOnly || typeIds.includes(endNode)) {
+            focusPath = true;
+          }
+        } else if (typeIds.includes(endNode)) {
+          if (!activeConnectionsOnly || typeIds.includes(startNode)) {
+            focusPath = true;
+          }
         }
+        return focusPath ? "black" : "";
       });
     }
+    this.focusGraphNodes(typeIds);
+  }
 
-    for (let i = 0; i < nodesToHover.length; i++) {
-      const nodeId = nodesToHover[i];
-      const type = this.contentManager_.getType(nodeId);
+  focusType(typeId, opt_activeTypeIds) {
+    let typeIdsToHover = [typeId];
+    for (var path in this.pathGroups_) {
+      this.pathGroups_[path].style("stroke", (d) => {
+        const startNode = d.properties.startNode;
+        const endNode = d.properties.endNode;
 
-      const element = $("#type-" + nodeId);
+        let focusPath = false;
+        if (startNode == typeId) {
+          typeIdsToHover.push(endNode);
+          focusPath = true;
+        } else if (endNode == typeId) {
+          typeIdsToHover.push(startNode);
+          focusPath = true;
+        }
+        return focusPath ? "black" : "";
+      });
+
+      this.focusGraphNodes(typeIdsToHover);
+    }
+  }
+
+  focusGraphNodes(typeIds) {
+    for (let i = 0; i < typeIds.length; i++) {
+      const typeId = typeIds[i];
+      const type = this.contentManager_.getType(typeId);
+
+      const element = $("#type-" + typeId);
       element.addClass('hovered');
       element.css({
         'background-color': (type && type.getCategory()) || 'red'
@@ -105,15 +150,22 @@ class InfoMap extends Component {
     }
   }
 
-  unhover(nodeId) {
+  unhover(typeId) {
+    if (this.ignoreHoverChnages_) {
+      return;
+    }
+    this.resetFocus(typeId);
+  }
+
+  resetFocus() {
     for (var path in this.pathGroups_) {
       this.pathGroups_[path].style("stroke", (d) => {
         return "";
       });
     }
-    for (let pair of this.nodes_) {
-      const nodeId = pair[0];
-      const element = $("#type-" + nodeId);
+    for (let pair of this.graphNodes_) {
+      const typeId = pair[0];
+      const element = $("#type-" + typeId);
       element.removeClass('hovered');
       element.css({
         'background-color': ""
@@ -125,7 +177,7 @@ class InfoMap extends Component {
     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
     this.map_ = new mapboxgl.Map({
-        container: 'geo_mapbox', // container id
+        container: 'info_mapbox', // container id
         style: 'mapbox://styles/mapbox/light-v9',
         center: [0, -.15],
         zoom: 10,
@@ -189,7 +241,7 @@ class InfoMap extends Component {
   }
 
   addGraph() {
-    this.nodes_ = new Map();
+    this.graphNodes_ = new Map();
     const width = .07;
     const height = .05;
     for (let i = 0; i < this.graph_.levels.length; i++) {
@@ -208,20 +260,20 @@ class InfoMap extends Component {
             offset + (j * width * spreadLevel),
             i * height * 1.5 * -1];
         const nodeObject =
-            new Node(node.id, coordinates, node.connections);
-        this.nodes_.set(node.id, nodeObject);
+            new GraphNode(node.id, coordinates, node.connections);
+        this.graphNodes_.set(node.id, nodeObject);
         this.addPoints(nodeObject);
       }
     }
   }
 
   createGeoLines() {
-    for (let pair of this.nodes_) {
+    for (let pair of this.graphNodes_) {
       const node = pair[1];
       const connections = node.getConnections();
       for (let k = 0; k < connections.length; k++) {
         const connection = connections[k];
-        this.createGeoLine(node, this.nodes_.get(connection));
+        this.createGeoLine(node, this.graphNodes_.get(connection));
       }
     }
     console.log(this.geojsonLine_);
@@ -232,8 +284,8 @@ class InfoMap extends Component {
   }
 
   flyToNode(typeId) {
-    const type = this.nodes_.get(typeId);
-    this.map_.flyTo({
+    const type = this.graphNodes_.get(typeId);
+    this.map_.easeTo({
       center: type.getCoordinates()
     });
   }
@@ -255,37 +307,46 @@ class InfoMap extends Component {
           ]
         },
         "properties": {
-          "startNode": startNode.getId(),
-          "endNode": endNode.getId()
+          "startNode": startNode.getTypeId(),
+          "endNode": endNode.getTypeId()
         }
       }
     );
   }
 
-  setActiveNode(geoId) {
-    this.filterById(geoId);
-    this.flyToNode(geoId);
+  setFocusedNode(typeId) {
+    // if (this.focusedTypeId_) {
+    //   this.unfocusType(this.focusedTypeId_);
+    // }
+    // this.focusType(typeId);
+    this.flyToNode(typeId);
+  }
+
+  clearFocusedNode() {
+    if (this.focusedTypeId_) {
+      this.unfocusType(this.focusedTypeId_);
+    }
   }
 
   render() {
-    console.log('renderGeoMap');
+    console.log('renderInfoMap');
     return (
-      <div className="geo_map">
-        <div id="geo_mapbox"/>
+      <div className="info_map">
+        <div id="info_mapbox"/>
       </div>
     );
   }
 }
 
-class Node {
-  constructor(id, coordinates, connections) {
-    this.id_ = id;
+class GraphNode {
+  constructor(typeId, coordinates, connections) {
+    this.typeId_ = typeId;
     this.coordinates_ = coordinates;
     this.connections_ = connections;
   }
 
-  getId() {
-    return this.id_;
+  getTypeId() {
+    return this.typeId_;
   }
 
   getCoordinates() {

@@ -1,8 +1,7 @@
 import $ from 'jquery';
 import React, { Component } from 'react';
 
-import { ContentTypeEnum } from './ContentManager.js';
-import { MapTypeEnum } from './MapManager.js';
+import { MapTypeEnum } from './ContentManager.js';
 import GeoMap from './GeoMap.js';
 
 
@@ -13,40 +12,82 @@ class GeoMapManager extends Component {
 		this.geoMap_ = null;
 	}
 
+	componentDidMount() {
+		this.updateVisibility();
+	}
+
+	componentDidUpdate() {
+		this.updateVisibility();
+	}
+
+	updateVisibility() {
+		$(".geo_map_manager").css({
+			"visibility": this.props.visible ? "visible" : "hidden"
+		});
+	}
+
+	completeLoad() {
+		return this.geoMap_.completeLoad();
+	}
+
+	handleActiveNodeChange(nodeId) {
+		const geoId = this.contentManager_.getNode(nodeId).getGeoId();
+		this.geoMap_.resetFocus();
+		this.geoMap_.showGeoIds([geoId + ""]);
+		this.geoMap_.flyToNode(geoId);
+	}
+
+	handleActiveTypeChange(typeId) {
+		const geoIds = [];
+		const nodes = this.contentManager_.getNodesForTypeId(typeId);
+		for (let i = 0; i < nodes.length; i++) {
+			geoIds.push(nodes[i].getGeoId() + "");
+		}
+		this.geoMap_.showGeoIds(geoIds);
+	}
+
+	handleActiveStoryChange(storyId) {
+		const geoIds = [];
+		const nodes = this.contentManager_.getNodesForStoryId(storyId);
+		for (let i = 0; i < nodes.length; i++) {
+			geoIds.push(nodes[i].getGeoId() + "");
+		}
+		this.geoMap_.showGeoIds(geoIds);
+	}
+
+	handleActiveFilterChange(filterType) {
+		this.geoMap_.filter(filterType);
+	}
+
+	resetActives() {
+		this.geoMap_.hideAllGeoNodes();
+	}
+
 	handleHoverNode(nodeId, origin) {
 		const geoId = this.contentManager_.getNode(nodeId).getGeoId();
-		const $mapItem = $('#geo_map_' + geoId);
+		const $mapItem = $('#geo-' + geoId);
 		$mapItem.addClass('hovered');
-		if (origin == ContentTypeEnum.GRID) {
-			this.geoMap_.flyToNode(geoId);
-		}
+		this.geoMap_.flyToNode(geoId);
 	}
 
 	handleUnhoverNode(nodeId, origin) {
 		const geoId = this.contentManager_.getNode(nodeId).getGeoId();
-		const $mapItem = $('#geo_map_' + geoId);
+		const $mapItem = $('#geo-' + geoId);
 		$mapItem.removeClass('hovered');
 	}
 
-	handleFilterChange(filterType) {
-		console.log('filter: ' + filterType);
-		this.geoMap_.filter(filterType);
-	}
-
-	clearActiveNode() {
-		this.geoMap_.resetFilters();
-	}
-
-	setActiveNode(nodeId) {
+	setFocusedNode(nodeId) {
 		const geoId = this.contentManager_.getNode(nodeId).getGeoId();
-		this.geoMap_.setActiveNode(geoId);
+		this.geoMap_.flyToNode(geoId);
 	}
+
+	clearFocusedNode() {}
 
 	render() {
 		return (
 			<div className="geo_map_manager">
 				<button className="map_button" onClick = {() => {
-					this.contentManager_.setMapType(MapTypeEnum.INFO);
+					this.contentManager_.updateActiveMapType(MapTypeEnum.INFO);
 				}}>
 					Info!
 				</button>

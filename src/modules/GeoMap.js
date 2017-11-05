@@ -10,15 +10,26 @@ import 'mapbox-gl/dist/svg/mapboxgl-ctrl-geolocate.svg';
 import 'mapbox-gl/dist/svg/mapboxgl-ctrl-zoom-in.svg';
 import 'mapbox-gl/dist/svg/mapboxgl-ctrl-zoom-out.svg';
 
-import { ContentTypeEnum, FilterTypeEnum } from './ContentManager.js';
+import { FilterTypeEnum } from './ContentManager.js';
 import GeoMapHover from './GeoMapHover.js';
 
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoib2hzbmFwaXRzY29saW4iLCJhIjoiY2o3bzkxZ2d1M2ZvajJ4bHh3NTdoMGVzOSJ9.ui98APpgyALQli44gDtXxg";
 
 const GeoNodeClassEnum = {
-  POINTS: "points",
-  LINES: "lines"
+  POINTS: 'points',
+  LINES: 'lines'
 };
+
+const GeoNodeTypeEnum = {
+  MARKER: 'marker',
+  PATH: 'path'
+}
+
+const LoadingStateEnum = {
+  WAITING: 'waiting',
+  LOADING: 'loading',
+  LOADED: 'loaded'
+}
 
 
 class GeoMap extends Component {
@@ -33,6 +44,10 @@ class GeoMap extends Component {
 
     this.mapHover_ = null;
     this.moveCounter_ = 0;
+
+    this.importCompletedPromise_ = null;
+
+    this.geoNodes_ = new Map();
   }
 
   importGeoJsons() {
@@ -48,24 +63,58 @@ class GeoMap extends Component {
   importGeoJson(file, type) {
     return import(`../resources/geojson/${file}.json`).then((geojson) => {
       const className = this.getClassForType(type);
-      this.pathGroups_[className] = this.createGeoNodes(geojson, className);
-      // if (className == GeoNodeClassEnum.POINTS) {
-      //   this.addPoints(geojson);
-      // }
+      switch(className) {
+        case GeoNodeClassEnum.LINES:
+          const geoPath = this.createGeoPath(geojson, className);
+          geoPath.each((path, i) => {
+            const geoNode = new GeoNode(
+              path.properties.geojsonId,
+              GeoNodeTypeEnum.PATH,
+              undefined /* this.coordinates */,
+              path);
+            this.geoNodes_.set(geoNode.getGeoId(), geoNode);
+          });
+          this.pathGroups_[className] = geoPath;
+          break;
+        case GeoNodeClassEnum.POINTS:
+          this.addPoints(geojson);
+          break;
+      }
     });
   }
 
   addPoints(geojson) {
     geojson.features.forEach((marker) => {
-      var el = document.createElement('div');
-      el.className = 'marker';
+      const el = document.createElement('div');
+
+      $(el).attr('id', 'geo-' + marker.properties.geojsonId);
+      $(el).attr('class', 'geo_marker');
 
       var lngLat = marker.geometry.coordinates.splice(-1);
-      console.log(lngLat);
+
+      const thisGeoMap = this;
+      $(el).click(function() {
+        const geoId = $(this).attr('id').split('-')[1];
+        thisGeoMap.clickGeoId(geoId, $(this));
+      });
+
+      $(el).hover(function() {
+        $(this).addClass('hovered');
+      }, function() {
+        $(this).removeClass('hovered');
+      });
+
       // make a marker for each feature and add to the map
       new mapboxgl.Marker(el)
-      .setLngLat(marker.geometry.coordinates)
-      .addTo(this.map_);
+          .setLngLat(marker.geometry.coordinates)
+          .addTo(this.map_);
+
+      const geoNode = new GeoNode(
+          marker.properties.geojsonId + "",
+          GeoNodeTypeEnum.MARKER,
+          marker.geometry.coordinates,
+          undefined /* path */);
+      this.geoNodes_.set(geoNode.getGeoId(), geoNode);
     });
   }
 
@@ -80,7 +129,7 @@ class GeoMap extends Component {
     }
   }
 
-  createGeoNodes(geojson, className) {
+  createGeoPath(geojson, className) {
     return this.svg_
       .append('g')
       .selectAll("path")
@@ -88,7 +137,8 @@ class GeoMap extends Component {
         .enter().append("path")
           .attr("d", this.path_)
           .attr('class', className)
-          .attr('id', (d) => { return 'geo_map_' + d.properties.geojsonId; });
+          .attr('id', (d) => { return 'geo-' + d.properties.geojsonId; })
+          .style("visibility", "hidden");
   }
 
   createMap() {
@@ -142,43 +192,54 @@ class GeoMap extends Component {
   }
 
   updatePaths() {
+    // this.geoNodes_.forEach((geoNode) => {
+    //   if (geoNode.getGeoNodeType() == GeoNodeTypeEnum.PATH) {
+    //     this.geoNode.getPath().attr("d", this.path_);
+    //   }
+    // });
     for (let path in this.pathGroups_) {
       this.pathGroups_[path].attr("d", this.path_);
-    };
+    }
+  }
+
+  updateActivePaths() {
+
   }
 
   // React component management
 
   componentDidMount() {
+    this.isMounted_ = true;
     this.createMap();
-    this.importGeoJsons().then(() => {
-      this.updateHovers()
-    });
+
+    this.importCompletedPromise_ = Promise.resolve(this.importGeoJsons());
+    this.importCompletedPromise_.then(() => {
+      // this.updateHovers();
+    })
   }
 
   componentDidUpdate() {
-    this.updateHovers();
+    this.importCompletedPromise_.then(() => {
+      // this.updateHovers();
+    });
   }
 
-  updateHovers() {
-    var thisGeoMap = this;
-    thisGeoMap.pathGroups_[GeoNodeClassEnum.POINTS].each(function(d) {
-      var $geoNode = $(this);
-      var $geoMap = $('#geo_mapbox');
+  componentWillUnmount() {
+    this.isMounted_ = false;
+  }
 
-      $geoNode.click(() => {
-        const geoId = d.properties.geojsonId;
-        const node = thisGeoMap.contentManager_.getNodeByGeoId(geoId);
+  clickGeoId(geoId, $element) {
+    const $geoMap = $('#geo_mapbox');
+    const node = this.contentManager_.getNodeByGeoId(geoId);
 
-        thisGeoMap.mapHover_.showHover(
-            $geoMap.offset().top + $geoMap.height(),
-            $geoMap.offset().left + $geoMap.width(),
-            $geoNode.position().top - $geoMap.offset().top,
-            $geoNode.position().left - $geoMap.offset().left,
-            node);
-        thisGeoMap.contentManager_.hoverNode(node.getId(), ContentTypeEnum.MAP);
-      });
-    });
+
+    this.mapHover_.showHover(
+        $geoMap.offset().top + $geoMap.height(),
+        $geoMap.offset().left + $geoMap.width(),
+        $element.position().top,
+        $element.position().left,
+        node);
+    // this.contentManager_.hoverNode(node.getId());
   }
 
   getRandomColor() {
@@ -190,10 +251,26 @@ class GeoMap extends Component {
     return color;
   }
 
+  showGeoIds(geoIds) {
+    $(".geo_marker").each(function() {
+      const $marker = $(this);
+      const geoId = $marker.attr('id').split('-')[1];
+      $marker.css({
+        'visibility': geoIds.includes(geoId) ? "visible" : "hidden"
+      });
+    });
+
+    for (var path in this.pathGroups_) {
+      this.pathGroups_[path].style("visibility", (d) => {
+        return geoIds.includes(d.properties.geojsonId)  ? "visible" : "hidden";
+      });
+    }
+  }
+
   filter(filterType) {
     console.log(filterType);
     if (filterType == FilterTypeEnum.NONE) {
-      this.resetFilters();
+      this.showAllGeoNodes();
     }
     if (filterType == FilterTypeEnum.GREEN) {
       this.updateColor('green')
@@ -207,18 +284,9 @@ class GeoMap extends Component {
   }
 
   flyToNode(geoId) {
-    console.log(geoId);
-    const element = d3.select('#geo_map_' + geoId);
-    console.log(element);
-    const coordinates = element.data()[0].geometry.coordinates;
-    this.map_.flyTo({
-      center: [coordinates[0], coordinates[1]]
+    this.map_.easeTo({
+      center: this.geoNodes_.get(geoId + "").getCoordinates()
     });
-  }
-
-  setActiveNode(geoId) {
-    this.filterById(geoId);
-    this.flyToNode(geoId);
   }
 
   animateLines() {
@@ -237,11 +305,36 @@ class GeoMap extends Component {
         .attr("stroke-dashoffset", 0);
   }
 
-  resetFilters() {
+  showAllGeoNodes() {
+    $(".geo_marker").each(function() {
+      $(this).css({
+        'visibility': 'visible'
+      })
+    });
+
     for (var path in this.pathGroups_) {
       this.pathGroups_[path].style("stroke", "");
       this.pathGroups_[path].style("visibility", "visible");
     };
+  }
+
+  hideAllGeoNodes() {
+    $(".geo_marker").each(function() {
+      $(this).css({
+        'visibility': 'hidden'
+      })
+    });
+
+    for (var path in this.pathGroups_) {
+      this.pathGroups_[path].style("stroke", "");
+      this.pathGroups_[path].style("visibility", "hidden");
+    };
+  }
+
+  resetFocus() {
+    $(".geo_marker").each(function() {
+      $(this).removeClass('hovered');
+    });
   }
 
   filterNullProperty(property) {
@@ -286,6 +379,10 @@ class GeoMap extends Component {
     };
   }
 
+  completeLoad() {
+    return this.importCompletedPromise_;
+  }
+
   render() {
     console.log('renderGeoMap');
     return (
@@ -294,12 +391,46 @@ class GeoMap extends Component {
           contentManager = {this.contentManager_}
           hoverClick = {(geoId) => {
             const nodeId = this.contentManager_.getNodeByGeoId(geoId).getId()
-            this.contentManager_.clickNode(nodeId, ContentTypeEnum.MAP);
+            this.contentManager_.clickNode(nodeId);
           }}
           ref = {(node) => { this.mapHover_ = node; }}/>
         <div id="geo_mapbox"/>
       </div>
     );
+  }
+}
+
+class GeoNode {
+  constructor(geoId, geoNodeType, coordinates, path) {
+    this.geoId_ = geoId;
+    this.geoNodeType_ = geoNodeType;
+    this.coordinates_ = coordinates;
+    this.path_ = path;
+    this.isActive_ = true;
+  }
+
+  getGeoId() {
+    return this.geoId_;
+  }
+
+  getGeoNodeType() {
+    return this.geoNodeType_;
+  }
+
+  getCoordinates() {
+    return this.coordinates_;
+  }
+
+  getPath() {
+    return this.path_;
+  }
+
+  setActive(isActive) {
+    this.isActive_ = isActive;
+  }
+
+  isActive() {
+    return this.isActive_;
   }
 }
 

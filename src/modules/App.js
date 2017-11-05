@@ -9,6 +9,10 @@ import NotFound from './NotFound.js';
 import '../App.css';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   componentWillMount() {
     var config = {
       apiKey: "AIzaSyAYKg_wG1d-8fKCgekMRD2bySxqg6KOtTU",
@@ -26,16 +30,22 @@ class App extends Component {
       <BrowserRouter>
         <div>
           <Route
-            component={Navigation} onChange={() => {
-              $('.content').scrollTop(0);
-            }}
-          />
+              component={Navigation} onChange={() => {
+                $('.content').scrollTop(0);
+              }} />
           <div className="content">
             <Switch>
-              <Route exact path="/" component={Main} />
-              <Route path="/home" component={Main} />
-              <Route path="/edit" component={Edit} />
-              <Route component={NotFound} />
+              <Route
+                  exact path="/"
+                  component={Main} />
+              <Route
+                  path="/home/"
+                  component={Main} />
+              <Route
+                  path="/edit"
+                  component={Edit} />
+              <Route
+                  component={NotFound} />
             </Switch>
           </div>
         </div>

@@ -1,19 +1,38 @@
 import $ from 'jquery';
 import React, { Component } from 'react';
 
-class Type {
-	constructor(typeObject) {
-		this.id_ = typeObject.id;
-		this.category_ = typeObject.category;
+import { GridTypeEnum } from './GridManager.js'
+
+class TypeRename extends Component {
+	constructor(props) {
+		super(props)
+		this.contentManager_ = props.contentManager;
 	}
 
-	getId() {
-		return this.id_;
-	}
+	render() {
+		let nodeButtons = [];
+		const nodes = this.contentManager_.getNodesForTypeId(this.props.typeId);
+		for (let i = 0; i < nodes.length; i++) {
+			const node = nodes[i];
+			nodeButtons.push(
+				<button onClick={() => {
+					this.contentManager_.updateActiveNodeId(node.getId());
+				}}>
+					{node.getName()}
+				</button>
+			);
+		}
 
-	getCategory() {
-		return this.category_;
+		return (
+			<div className="type">
+				<div>
+					{this.props.typeId}
+					{nodeButtons}
+				</div>
+			</div>
+		);
 	}
 }
 
-export default Type;
+export default TypeRename;
+

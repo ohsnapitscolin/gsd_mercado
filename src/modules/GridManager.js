@@ -4,51 +4,107 @@ import PubSub from 'pubsub-js';
 
 import About from './About.js'
 import SelectionManager from './SelectionManager.js'
-import StoryManager from './StoryManager.js'
+import Story from './Story.js'
+import Type from './Type.js'
+import Node from './Node.js'
 
-import { GRID_TYPE_CHANGE_EVENT, CLICK_NODE_EVENT } from './ContentManager.js'
+import { GridTypeEnum, ACTIVE_PARAMS_CHANGE_EVENT } from './ContentManager.js'
 
-export const GridTypeEnum = {
-	SELECTION : 0,
-  STORY : 1,
-  ABOUT: 2
-};
-
+const DEFAULT_GRID_TYPE = GridTypeEnum.SELECTION;
 
 class GridManager extends Component {
 	constructor(props) {
 		super(props)
 		this.contentManager_ = props.contentManager;
-		this.currentManager_ = null;
 
-		this.token_ = PubSub.subscribe(
-				GRID_TYPE_CHANGE_EVENT, this.handleGridTypeChange.bind(this));
-		this.token_ = PubSub.subscribe(
-				CLICK_NODE_EVENT, this.handleStoryClicked.bind(this));
+		this.tokens_ = [];
+		this.tokens_.push(PubSub.subscribe(
+				ACTIVE_PARAMS_CHANGE_EVENT, this.handleActiveParamsChange.bind(this)));
+		// this.tokens_.push(PubSub.subscribe(
+		// 		ACTIVE_NODE_CHANGE_EVENT, this.handleActiveNodeChange.bind(this)));
+		// this.tokens_.push(PubSub.subscribe(
+		// 		ACTIVE_TYPE_CHANGE_EVENT, this.handleActiveTypeChange.bind(this)));
+		// this.tokens_.push(PubSub.subscribe(
+		// 		ACTIVE_STORY_CHANGE_EVENT, this.handleActiveStoryChange.bind(this)));
+		// this.tokens_.push(PubSub.subscribe(
+		// 		ACTIVE_FILTER_CHANGE_EVENT, this.handleActiveFilterChange.bind(this)));
+
+		// if (activeNodeId) {
+		// 	gridType = GridTypeEnum.NODE;
+		// 	nodeId = activeNodeId;
+		// } else if (activeTypeId) {
+		// 	gridType = GridTypeEnum.TYPE
+		// 	typeId = activeTypeId;
+		// } else if (activeStoryId) {
+		// 	gridType = GridTypeEnum.STORY;
+
+		// 	// TODO(colin): Add support for all story ids.
+		// 	// storyId = activeStoryId;
+		// 	storyId = 6;
+		// }
 
 		this.state = {
-			type: GridTypeEnum.SELECTION,
-			expanded: false,
-			nodeId: -1
+			type: DEFAULT_GRID_TYPE,
+			nodeId: null,
+			typeId: null,
+			storyId: null,
+			filterType: null
 		};
 	}
 
-	handleGridTypeChange(e, gridType, opt_storyId) {
+	handleActiveParamsChange(e, data) {
 		this.setState({
-			type: gridType,
-			nodeId: opt_storyId || -1
+			type: this.contentManager_.getActiveGridType(),
+			nodeId: this.contentManager_.getActiveNodeId(),
+			typeId: this.contentManager_.getActiveTypeId(),
+			storyId: this.contentManager_.getActiveStoryId() ? 6 : null,
+			// storyId: this.contentManager_.getActiveStoryId(),
+			filterType: this.contentManager_.getActiveFilterType()
 		});
 	}
 
-	handleStoryClicked(e, data) {
+	handleActiveTypeChange(e, data) {
+		if (!data.typeId) {
+			return;
+		}
+
+		this.setState({
+			type: GridTypeEnum.TYPE,
+			nodeId: data.typeId,
+			typeId: null,
+			storyId: null,
+			filterType: null
+		});
+	}
+
+	handleActiveStoryChange(e, data) {
+		if (!data.storyId) {
+			return;
+		}
+
 		this.setState({
 			type: GridTypeEnum.STORY,
-			nodeId: data.nodeId
+			nodeId: null,
+			typeId: null,
+			storyId: 6,
+			filterType: null
+			// TODO(colin): Add support for all story ids.
+			// storyId: data.storyId
 		});
 	}
 
-	componentDidMount() {
-		// this.expand(2000);
+	handleActiveFilterChange(e, data) {
+		if (!data.filterType) {
+			return;
+		}
+
+		this.setState({
+			type: GridTypeEnum.SELECTION,
+			nodeId: null,
+			typeId: null,
+			storyId: null,
+			filterType: data.filterType
+		});
 	}
 
 	expand() {
@@ -61,20 +117,51 @@ class GridManager extends Component {
 		$('.grid_manager').animate({width: '50%'}, 500);
 	}
 
+	renderBackButton() {
+		return (
+			<button onClick={() => {
+				this.contentManager_.updateActiveGridType(GridTypeEnum.SELECTION);
+			}}>
+				Back
+			</button>
+		);
+	}
+
 	renderGridType() {
+		console.log('renderGridType: ' + this.state);
 		switch(this.state.type) {
 			case GridTypeEnum.SELECTION:
 				return (
 					<SelectionManager
 							contentManager = {this.contentManager_}
-							ref={(node) => { this.currentManager_ = node; }}/>
+							filterType = { this.state.filterType }/>
+				);
+			case GridTypeEnum.NODE:
+				return (
+					<div className="grid_node">
+						{this.renderBackButton()}
+						<Node
+								contentManager = {this.contentManager_}
+								nodeId = {this.state.nodeId} />
+					</div>
+				);
+			case GridTypeEnum.TYPE:
+				return (
+					<div className="grid_type">
+						{this.renderBackButton()}
+						<Type
+								contentManager = {this.contentManager_}
+								typeId = {this.state.typeId} />
+					</div>
 				);
 			case GridTypeEnum.STORY:
 				return (
-					<StoryManager
-							contentManager = {this.contentManager_}
-							nodeId = {this.state.nodeId}
-							ref={(node) => { this.currentManager_ = node; }} />
+					<div className="grid_story">
+						{this.renderBackButton()}
+						<Story
+								contentManager = {this.contentManager_}
+								storyId = {this.state.storyId} />
+					</div>
 				);
 			case GridTypeEnum.ABOUT:
 				return (
@@ -97,20 +184,8 @@ class GridManager extends Component {
 					{this.state.expanded ? 'Contract' : 'Expand'}
 				</button>
 				<button onClick = {() => {
-					this.contract()
-					this.contentManager_.setGridType(GridTypeEnum.SELECTION);
-				}}>
-					Selection!
-				</button>
-				<button onClick = {() => {
-					this.contract()
-					this.contentManager_.setGridType(GridTypeEnum.STORY);
-				}}>
-					Story!
-				</button>
-				<button onClick = {() => {
 					this.expand()
-					this.contentManager_.setGridType(GridTypeEnum.ABOUT);
+					this.contentManager_.updateActiveGridType(GridTypeEnum.ABOUT);
 				}}>
 					About!
 				</button>

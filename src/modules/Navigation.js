@@ -11,6 +11,7 @@ var PathEnum = {
 
 class Navigation extends Component {
   render() {
+    console.log('render');
     return (
       <div className="navigation">
         <Link id="home_link" to="/home" onClick={this.props.onClick}>

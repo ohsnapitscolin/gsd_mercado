@@ -98,7 +98,21 @@ svg {
   height: 100%;
 }
 
-.marker {
+.geo_marker {
+  width: 15px;
+  height: 15px;
+  background-color: pink;
+}
+
+.geo_marker.hovered {
+  background-color: blue;
+}
+
+.geo_marker:hover {
+  cursor: pointer;
+}
+
+.info_marker {
   padding: 5px;
   color: grey;
   background-color: lightgrey;
@@ -106,11 +120,11 @@ svg {
   overflow-x: hidden;
 }
 
-.marker:hover {
+.info_marker:hover {
   cursor: pointer;
 }
 
-.marker.hovered {
+.info_marker.hovered {
   color: black;
 }
 
@@ -197,14 +211,28 @@ svg {
   z-index: 1;
 }
 
-.geo_map_manager {
+.grid_story {
+  position: relative;
   width: 100%;
   height: 100%;
 }
 
-.info_map_manager {
+.geo_map_manager {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  z-index: 0;
+}
+
+.info_map_manager {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 }
 
 .geo_map {
@@ -218,6 +246,19 @@ svg {
   height: 100%;
   margin: auto;
 }
+
+.info_map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#info_mapbox {
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
 
 .points {
   stroke: blue;
