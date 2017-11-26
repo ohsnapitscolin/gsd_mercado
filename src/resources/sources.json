@@ -1,0 +1,32 @@
+[
+	{
+		"id": "test_source_1",
+		"geoId": "test_geo_6",
+		"typeId": "individual",
+		"name": "Test_Source_1"
+	},
+	{
+		"id": "test_source_2",
+		"geoId": "test_geo_7",
+		"typeId": "individual",
+		"name": "Test_Source_2"
+	},
+	{
+		"id": "test_source_3",
+		"geoId": "test_geo_8",
+		"typeId": "informal_commercial",
+		"name": "Test_Source_3"
+	},
+	{
+		"id": "test_source_4",
+		"geoId": "test_geo_9",
+		"typeId": "informal_commercial",
+		"name": "Test_Source_4"
+	},
+	{
+		"id": "test_source_5",
+		"geoId": "test_geo_10",
+		"typeId": "individual",
+		"name": "Test_Source_5"
+	}
+]

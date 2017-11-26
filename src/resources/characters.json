@@ -1,0 +1,52 @@
+[
+	{
+		"id": "test_character_1",
+		"nodes": ["test_node_1", "test_node_2"],
+		"materials": ["test_material_1"],
+		"name": "Test Character 1",
+		"formality": 1,
+		"job": "test_job_1",
+		"pay_type": 1,
+		"home": "delegacion_1"
+	},
+	{
+		"id": "test_character_2",
+		"nodes": ["test_node_2"],
+		"materials": ["test_material_2"],
+		"name": "Test Character 2",
+		"formality": 2,
+		"job": "test_job_2",
+		"pay_type": 2,
+		"home": "delegacion_2"
+	},
+	{
+		"id": "test_character_3",
+		"nodes": ["test_node_3"],
+		"materials": [],
+		"name": "Test Character 3",
+		"formality": 3,
+		"job": "test_job_3",
+		"pay_type": 1,
+		"home": "delegacion_3"
+	},
+	{
+		"id": "test_character_4",
+		"nodes": ["test_node_4"],
+		"materials": [],
+		"name": "Test Character 4",
+		"formality": 4,
+		"job": "test_job_4",
+		"pay_type": 1,
+		"home": "delegacion_4"
+	},
+	{
+		"id": "test_character_5",
+		"nodes": ["test_node_5"],
+		"materials": [],
+		"name": "Test Character 5",
+		"formality": 5,
+		"job": "test_job_5",
+		"pay_type": 1,
+		"home": "delegacion_5"
+	}
+]

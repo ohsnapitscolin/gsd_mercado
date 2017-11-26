@@ -1,0 +1,104 @@
+{
+	"id": "test_story_1",
+	"material": "test_material_1",
+	"images": [],
+	"chapters": [
+		{
+			"id": "test_chapter_1",
+			"geoId": "test_geo_5",
+			"typeId": "individual",
+			"text": "Buy “Vanidades” (a magazine) from OXXO",
+			"decisions": [
+				{
+					"chapterId": "test_chapter_2",
+					"text": "See more"
+				}
+			]
+		},
+		{
+			"id": "test_chapter_2",
+			"nodeId": "test_node_1",
+			"text": "Eventually throws it away into:",
+			"decisions": [
+				{
+					"chapterId": "test_chapter_3",
+					"text": "Public recycling bin"
+				},
+				{
+					"chapterId": "test_chapter_3",
+					"text": "Home trash"
+				},
+				{
+					"chapterId": "test_chapter_3",
+					"text": "Brings to recollection center"
+				}
+			]
+		},
+		{
+			"id": "test_chapter_3",
+			"nodeId": "test_node_1",
+			"text": "Apartment cleaner - takes communal trash and puts it out for barrendero to pick up.",
+			"decisions": [
+				{
+					"chapterId": "test_chapter_4",
+					"text": "See more"
+				}
+			]
+		},
+		{
+			"id": "test_chapter_4",
+			"nodeId": "test_node_2",
+			"characterId": "test_character_1",
+			"text": "Genaro - picks it + other paper goods up from trash outside",
+			"decisions": [
+				{
+					"chapterId": "test_chapter_5",
+					"text": "See more"
+				}
+			]
+		},
+		{
+			"id": "test_chapter_5",
+			"nodeId": "test_node_3",
+			"characterId": "test_character_1",
+			"text": "Genaro - brings it to Recupera",
+			"decisions": [
+				{
+					"chapterId": "test_chapter_6",
+					"text": "See more"
+				}
+			]
+		},
+		{
+			"id": "test_chapter_6",
+			"nodeId": "test_node_4",
+			"characterId": "test_character_2",
+			"text": "Gustavo - weighs the magazine with other items, puts it into paper pile",
+			"decisions": [
+				{
+					"chapterId": "test_chapter_7",
+					"text": "See more"
+				}
+			]
+		},
+		{
+			"id": "test_chapter_7",
+			"nodeId": "test_node_4",
+			"characterId": "test_character_3",
+			"text": "Eduardo - gives money to Genaro",
+			"decisions": [
+				{
+					"chapterId": "test_chapter_8",
+					"text": "See more"
+				}
+			]
+		},
+		{
+			"id": "test_chapter_8",
+			"nodeId": "test_node_5",
+			"characterId": "test_character_4",
+			"text": "Joel Marquez - chofer. Drives the magazine to PaperGreen",
+			"decisions": []
+		}
+	]
+}

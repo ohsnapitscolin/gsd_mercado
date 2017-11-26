@@ -1,0 +1,398 @@
+[
+	{
+		"nodeId":"0id",
+		"geoId": 0,
+		"infoId":"tlatelolco",
+		"name":"Paper Green"
+	},
+	{
+		"nodeId":"1id",
+		"geoId":1,
+		"infoId":"formal_commercial",
+		"name":"Centro Reciclaje Inare"
+	},
+			{
+		"nodeId":"2id",
+		"geoId":2,
+		"infoId":"informal_commercial",
+		"name":"Paper Green"
+	},
+	{
+		"nodeId":"3id",
+		"geoId":3,
+		"infoId":"individual",
+		"name":"Centro Reciclaje Inare"
+	},
+	{
+		"nodeId":"4id",
+		"geoId":"1line_id",
+		"infoId":"individual",
+		"name":"Paper Green"
+	},
+	{
+		"nodeId":"5id",
+		"geoId":5,
+		"infoId":"public_park",
+		"name":"Centro Reciclaje Inare"
+	},
+	{
+		"nodeId":"6id",
+		"geoId":6,
+		"infoId":"tlatelolco_electric_car",
+		"name":"Centro Reciclaje Inare"
+	},
+	{
+		"nodeId":"7id",
+		"geoId":7,
+		"infoId":"trash_truck_storage",
+		"name":"Organización de triciclo-recolectores (Antonio López)"
+	},
+	{
+		"nodeId":"8id",
+		"geoId":8,
+		"infoId":"montones",
+		"name":"Centro de acopio"
+	},
+	{
+		"nodeId":"9id",
+		"geoId":9,
+		"infoId":"chatarrero_perifoneo",
+		"name":"Casa de familia López González"
+	},
+	{
+		"nodeId":"10id",
+		"geoId":10,
+		"infoId":"trash_truck_storage",
+		"name":"Centro de Acopio de Jocelyn"
+	},
+	{
+		"nodeId":"11id",
+		"geoId":11,
+		"infoId":"electric_car",
+		"name":"Oikos Metales"
+	},
+	{
+		"nodeId":"12id",
+		"geoId":12,
+		"infoId":"formal_street_sweeper",
+		"name":"Deposito de Papel"
+	},
+	{
+		"nodeId":"13id",
+		"geoId":13,
+		"infoId":"pepenadores",
+		"name":"Centro de Reciclaje Doctores"
+	},
+	{
+		"nodeId":"14id",
+		"geoId":14,
+		"infoId":"electric_car",
+		"name":"Centro de Acopio of Ulises Hernandez Rodriguez"
+	},
+	{
+		"nodeId":"15id",
+		"geoId":15,
+		"infoId":"trash_truck",
+		"name":"Amigos del Medio Ambiente - Reciclables Los Gallos"
+	},
+	{
+		"nodeId":"16id",
+		"geoId":16,
+		"infoId":"chacharrero",
+		"name":"Acopio Ecatepec PetStar"
+	},
+	{
+		"nodeId":"17id",
+		"geoId":17,
+		"infoId":"small_recollection_center",
+		"name":"Compra y Venta de Desperdicios Industriales (Monica)"
+	},
+	{
+		"nodeId":"18id",
+		"geoId":18,
+		"infoId":"tlatelolco_transfer_station",
+		"name":"Neza III"
+	},
+	{
+		"nodeId":"19id",
+		"geoId":19,
+		"infoId":"other_plastic_nomadic_buyer",
+		"name":"Planta de Composta en Bordo Poniente"
+	},
+	{
+		"nodeId":"20id",
+		"geoId":20,
+		"infoId":"paper_medium_recollection_center",
+		"name":"Centro Bios"
+	},
+	{
+		"nodeId":"21id",
+		"geoId":21,
+		"infoId":"trash_truck",
+		"name":"Centro ecológico 3R"
+	},
+	{
+		"nodeId":"22id",
+		"geoId":22,
+		"infoId":"paper_large_recollection_center",
+		"name":"Piensa Verde"
+	},
+	{
+		"nodeId":"23id",
+		"geoId":23,
+		"infoId":"trash_truck",
+		"name":"Tecnologia Metalurgica Industrial"
+	},
+	{
+		"nodeId":"24id",
+		"geoId":24,
+		"infoId":"transfer_station",
+		"name":"Fundición Jacarandas"
+	},
+	{
+		"nodeId":"25id",
+		"geoId":25,
+		"infoId":"trash_truck_storage",
+		"name":"Mercado de Trueque Bosque San Juan de Aragón"
+	},
+	{
+		"nodeId":"26id",
+		"geoId":26,
+		"infoId":"chacharrero",
+		"name":"Mercado de Trueque Bosque de Chapultepec"
+	},
+	{
+		"nodeId":"27id",
+		"geoId":27,
+		"infoId":"pepenadores",
+		"name":"Central de Abastos"
+	},
+	{
+		"nodeId":"28id",
+		"geoId":28,
+		"infoId":"montones",
+		"name":"Tianguis Chimalhuacan"
+	},
+	{
+		"nodeId":"29id",
+		"geoId":29,
+		"infoId":"paper_large_recollection_center",
+		"name":"Tianguis San Juan"
+	},
+	{
+		"nodeId":"30id",
+		"geoId":30,
+		"infoId":"pet_nomadic_buyer",
+		"name":"Tianguis Santa Marta Carcel"
+	},
+	{
+		"nodeId":"31id",
+		"geoId":31,
+		"infoId":"individual",
+		"name":"Bodega for Sector 9 Barrenderos"
+	},
+	{
+		"nodeId":"32id",
+		"geoId":32,
+		"infoId":"chatarrero_perifoneo",
+		"name":"Campamento de Vehiculos de Limpia \"Pino\""
+	},
+	{
+		"nodeId":"33id",
+		"geoId":33,
+		"infoId":"montones",
+		"name":"Planta de Selección San Juan de Aragón"
+	},
+	{
+		"nodeId":"34id",
+		"geoId":34,
+		"infoId":"montones",
+		"name":"Planta de Selección Santa Catarina"
+	},
+	{
+		"nodeId":"35id",
+		"geoId":35,
+		"infoId":"mercado_de_trueque",
+		"name":"Relleno Sanitario Cuautitlán"
+	},
+	{
+		"nodeId":"36id",
+		"geoId":36,
+		"infoId":"small_recollection_center",
+		"name":"Relleno Sanitario Milagro"
+	},
+	{
+		"nodeId":"37id",
+		"geoId":37,
+		"infoId":"paper_nomadic_buyer",
+		"name":"Relleno Sanitario Cañada"
+	},
+	{
+		"nodeId":"38id",
+		"geoId":38,
+		"infoId":"pet_nomadic_buyer",
+		"name":"Espiriyón's place"
+	},
+	{
+		"nodeId":"39id",
+		"geoId":39,
+		"infoId":"other_plastic_nomadic_buyer",
+		"name":"Fernando Mejía place"
+	},
+	{
+		"nodeId":"40id",
+		"geoId":40,
+		"infoId":"transfer_station",
+		"name":"Ana Ortiz place"
+	},
+	{
+		"nodeId":"41id",
+		"geoId":41,
+		"infoId":"metal_medium_recollection_center",
+		"name":"José manuel's place"
+	},
+	{
+		"nodeId":"42id",
+		"geoId":42,
+		"infoId":"metal_medium_recollection_center",
+		"name":"José Manuel, Prado de Churubusco"
+	},
+	{
+		"nodeId":"43id",
+		"geoId":43,
+		"infoId":"paper_large_recollection_center",
+		"name":"José Manuel, Iztacalco"
+	},
+	{
+		"nodeId":"44id",
+		"geoId":44,
+		"infoId":"trash_truck",
+		"name":"Mónica, E-waste"
+	},
+	{
+		"nodeId":"45id",
+		"geoId":45,
+		"infoId":"individual",
+		"name":"Mónica, metal (fierro)"
+	},
+	{
+		"nodeId":"46id",
+		"geoId":46,
+		"infoId":"barrendero_cart_storage",
+		"name":"Mónica, cardboard (cartón)"
+	},
+	{
+		"nodeId":"47id",
+		"geoId":47,
+		"infoId":"tlatelolco_transfer_station",
+		"name":"Veronica Flores"
+	},
+	{
+		"nodeId":"48id",
+		"geoId":48,
+		"infoId":"metal_nomadic_buyer",
+		"name":"Bernardo Renteria, administrator, husband of veronica 7/11"
+	},
+	{
+		"nodeId":"49id",
+		"geoId":49,
+		"infoId":"metal_medium_recollection_center",
+		"name":"Eduardo Macias Leon, cousin of veronica, 7/15"
+	},
+	{
+		"nodeId":"50id",
+		"geoId":50,
+		"infoId":"paper_medium_recollection_center",
+		"name":"Joel Marquez de Orteo, funny worker 7/15"
+	},
+	{
+		"nodeId":"51id",
+		"geoId":51,
+		"infoId":"foundry_ferrous",
+		"name":"Gustavo Dominguez Martinez"
+	},
+	{
+		"nodeId":"52id",
+		"geoId":52,
+		"infoId":"formal_commercial",
+		"name":"Genaro Garcia"
+	},
+	{
+		"nodeId":"53id",
+		"geoId":53,
+		"infoId":"informal_commercial",
+		"name":"Genaro Garcia"
+	},
+	{
+		"nodeId":"54id",
+		"geoId":54,
+		"infoId":"individual",
+		"name":"Genaro Garcia"
+	},
+	{
+		"nodeId":"55id",
+		"geoId":55,
+		"infoId":"carrero_informal_collector",
+		"name":"Genaro Garcia"
+	},
+	{
+		"nodeId":"56id",
+		"geoId":56,
+		"infoId":"individual",
+		"name":"Nora Casecas"
+	},
+	{
+		"nodeId":"57id",
+		"geoId":57,
+		"infoId":"formal_commercial",
+		"name":"Jose and Juana"
+	},
+	{
+		"nodeId":"58id",
+		"geoId":58,
+		"infoId":"formal_commercial",
+		"name":"Roberta Velasco"
+	},
+	{
+		"nodeId":"59id",
+		"geoId":59,
+		"infoId":"individual",
+		"name":"Oikos Metales"
+	},
+	{
+		"nodeId":"60id",
+		"geoId":60,
+		"infoId":"tlatelolco_electric_car",
+		"name":"Tecnologia Metalurgica Industrial"
+	},
+	{
+		"nodeId":"61id",
+		"geoId":61,
+		"infoId":"formal_commercial",
+		"name":"Carlos Armando Retana Campos"
+	},
+	{
+		"nodeId":"62id",
+		"geoId":62,
+		"infoId":"chatarrero_perifoneo",
+		"name":"Arturo Zuñiga"
+	},
+	{
+		"nodeId":"63id",
+		"geoId":63,
+		"infoId":"montones",
+		"name":"José Alberto Absalón García"
+	},
+	{
+		"nodeId":"64id",
+		"geoId":64,
+		"infoId":"tlatelolco",
+		"name":"Estación de transferencia / Cuauhtémoc"
+	},
+	{
+		"nodeId":"65id",
+		"geoId":65,
+		"infoId":"carrero_informal_collector",
+		"name":"Estación de transferencia / Venustiana Carranza"
+	}
+]
