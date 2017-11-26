@@ -2,15 +2,19 @@ import $ from 'jquery';
 import React, { Component } from 'react';
 import PubSub from 'pubsub-js';
 
-import About from './About.js'
-import SelectionManager from './SelectionManager.js'
+import About from './About.js';
+import SelectionManager from './SelectionManager.js';
 import Story from './Story.js'
-import Type from './Type.js'
-import Node from './Node.js'
+import StoryNew from './StoryNew.js';
+import Type from './Type.js';
+import Node from './Node.js';
+import Character from './Character.js';
+import Material from './Material.js';
 
-import { GridTypeEnum, ACTIVE_PARAMS_CHANGE_EVENT } from './ContentManager.js'
+import { GridTypeEnum, MapTypeEnum,
+		ACTIVE_PARAMS_CHANGE_EVENT } from './ContentManager.js'
 
-const DEFAULT_GRID_TYPE = GridTypeEnum.SELECTION;
+const DEFAULT_GRID_TYPE = GridTypeEnum.NODE;
 
 class GridManager extends Component {
 	constructor(props) {
@@ -20,107 +24,80 @@ class GridManager extends Component {
 		this.tokens_ = [];
 		this.tokens_.push(PubSub.subscribe(
 				ACTIVE_PARAMS_CHANGE_EVENT, this.handleActiveParamsChange.bind(this)));
-		// this.tokens_.push(PubSub.subscribe(
-		// 		ACTIVE_NODE_CHANGE_EVENT, this.handleActiveNodeChange.bind(this)));
-		// this.tokens_.push(PubSub.subscribe(
-		// 		ACTIVE_TYPE_CHANGE_EVENT, this.handleActiveTypeChange.bind(this)));
-		// this.tokens_.push(PubSub.subscribe(
-		// 		ACTIVE_STORY_CHANGE_EVENT, this.handleActiveStoryChange.bind(this)));
-		// this.tokens_.push(PubSub.subscribe(
-		// 		ACTIVE_FILTER_CHANGE_EVENT, this.handleActiveFilterChange.bind(this)));
-
-		// if (activeNodeId) {
-		// 	gridType = GridTypeEnum.NODE;
-		// 	nodeId = activeNodeId;
-		// } else if (activeTypeId) {
-		// 	gridType = GridTypeEnum.TYPE
-		// 	typeId = activeTypeId;
-		// } else if (activeStoryId) {
-		// 	gridType = GridTypeEnum.STORY;
-
-		// 	// TODO(colin): Add support for all story ids.
-		// 	// storyId = activeStoryId;
-		// 	storyId = 6;
-		// }
 
 		this.state = {
-			type: DEFAULT_GRID_TYPE,
+			gridType: DEFAULT_GRID_TYPE,
 			nodeId: null,
+			characterId: null,
+			materialId: null,
 			typeId: null,
 			storyId: null,
 			filterType: null
 		};
+
+		this.recentGridType_ = DEFAULT_GRID_TYPE;
+		this.expanded_ = false;
 	}
 
 	handleActiveParamsChange(e, data) {
 		this.setState({
-			type: this.contentManager_.getActiveGridType(),
+			gridType: this.contentManager_.getActiveGridType(),
 			nodeId: this.contentManager_.getActiveNodeId(),
+			characterId: this.contentManager_.getActiveCharacterId(),
+			materialId: this.contentManager_.getActiveMaterialId(),
 			typeId: this.contentManager_.getActiveTypeId(),
-			storyId: this.contentManager_.getActiveStoryId() ? 6 : null,
+			storyId: this.contentManager_.getActiveStoryId() ? 'test_story_1' : null,
 			// storyId: this.contentManager_.getActiveStoryId(),
-			filterType: this.contentManager_.getActiveFilterType()
+			filterType: this.contentManager_.getActiveFilterData()
 		});
+
+		if (data.mapTypeChanged()) {
+			this.style();
+		}
 	}
 
-	handleActiveTypeChange(e, data) {
-		if (!data.typeId) {
-			return;
-		}
-
-		this.setState({
-			type: GridTypeEnum.TYPE,
-			nodeId: data.typeId,
-			typeId: null,
-			storyId: null,
-			filterType: null
-		});
+	componentDidMount() {
+		this.style();
 	}
 
-	handleActiveStoryChange(e, data) {
-		if (!data.storyId) {
-			return;
+	style() {
+		if(this.contentManager_.getActiveMapType() == MapTypeEnum.NONE) {
+			this.expand();
+			this.expanded_ = true;
+		} else {
+			this.contract();
+			this.expanded_ = false;
 		}
-
-		this.setState({
-			type: GridTypeEnum.STORY,
-			nodeId: null,
-			typeId: null,
-			storyId: 6,
-			filterType: null
-			// TODO(colin): Add support for all story ids.
-			// storyId: data.storyId
-		});
-	}
-
-	handleActiveFilterChange(e, data) {
-		if (!data.filterType) {
-			return;
-		}
-
-		this.setState({
-			type: GridTypeEnum.SELECTION,
-			nodeId: null,
-			typeId: null,
-			storyId: null,
-			filterType: data.filterType
-		});
 	}
 
 	expand() {
-		this.setState({ expanded: true });
-		$('.grid_manager').animate({width: '100%'}, 500);
+		if (this.expanded_) {
+			this.contentManager_.maybeSetGridLoaded();
+			return;
+		}
+		// $('.grid_content').css({visibility: 'hidden'});
+		$('.grid_manager').animate({width: '100%'}, 150, () => {
+			// $('.grid_content').css({visibility: 'visible'});
+			this.contentManager_.maybeSetGridLoaded();
+		});
 	}
 
 	contract() {
-		this.setState({ expanded: false });
-		$('.grid_manager').animate({width: '50%'}, 500);
+		if (!this.expanded_) {
+			this.contentManager_.maybeSetGridLoaded();
+			return;
+		}
+		// $('.grid_content').css({'visibility': 'hidden'});
+		$('.grid_manager').animate({width: '50%'}, 150, () => {
+			// $('.grid_content').css({'visibility': 'visible'});
+			this.contentManager_.maybeSetGridLoaded();
+		});
 	}
 
 	renderBackButton() {
 		return (
 			<button onClick={() => {
-				this.contentManager_.updateActiveGridType(GridTypeEnum.SELECTION);
+				this.contentManager_.updateActiveGridType(this.recentGridType_);
 			}}>
 				Back
 			</button>
@@ -129,26 +106,51 @@ class GridManager extends Component {
 
 	renderGridType() {
 		console.log('renderGridType: ' + this.state);
-		switch(this.state.type) {
-			case GridTypeEnum.SELECTION:
-				return (
-					<SelectionManager
-							contentManager = {this.contentManager_}
-							filterType = { this.state.filterType }/>
-				);
+
+		if (this.state.gridType == GridTypeEnum.ABOUT) {
+			return (
+				<About
+						contentManager = {this.contentManager_}
+						ref={null} />
+			);
+		} else if (!this.contentManager_.hasActiveBreakdown()) {
+			this.recentGridType_ = this.state.gridType;
+			return (
+				<SelectionManager
+						contentManager = {this.contentManager_}
+						selectionType = {this.state.gridType}
+						filterType = {this.state.filterType} />
+			);
+		}
+
+		switch(this.state.gridType) {
 			case GridTypeEnum.NODE:
 				return (
 					<div className="grid_node">
-						{this.renderBackButton()}
 						<Node
 								contentManager = {this.contentManager_}
 								nodeId = {this.state.nodeId} />
 					</div>
 				);
+			case GridTypeEnum.CHARACTER:
+				return (
+					<div className="grid_character">
+						<Character
+								contentManager = {this.contentManager_}
+								characterId = {this.state.characterId} />
+					</div>
+				);
+			case GridTypeEnum.MATERIAL:
+				return (
+					<div className="grid_material">
+						<Material
+								contentManager = {this.contentManager_}
+								materialId = {this.state.materialId} />
+					</div>
+				);
 			case GridTypeEnum.TYPE:
 				return (
 					<div className="grid_type">
-						{this.renderBackButton()}
 						<Type
 								contentManager = {this.contentManager_}
 								typeId = {this.state.typeId} />
@@ -157,17 +159,10 @@ class GridManager extends Component {
 			case GridTypeEnum.STORY:
 				return (
 					<div className="grid_story">
-						{this.renderBackButton()}
-						<Story
+						<StoryNew
 								contentManager = {this.contentManager_}
 								storyId = {this.state.storyId} />
 					</div>
-				);
-			case GridTypeEnum.ABOUT:
-				return (
-					<About
-							contentManager = {this.contentManager_}
-							ref={null} />
 				);
 		}
 		return (
@@ -177,19 +172,57 @@ class GridManager extends Component {
 
 	render() {
 		return (
-			<div className="grid_manager">
-				<button onClick = {() => {
-					this.state.expanded ? this.contract() : this.expand();
+			<div
+					className="grid_manager"
+					id={"grid_manager_" + this.state.gridType}>
+				<div
+						className="grid_header grid_header_story"
+						onClick = {() => {
+					this.contentManager_.updateActiveGridType(GridTypeEnum.STORY);
 				}}>
-					{this.state.expanded ? 'Contract' : 'Expand'}
-				</button>
-				<button onClick = {() => {
-					this.expand()
+					<div className="grid_header_content">
+						Stories
+					</div>
+				</div>
+				<div
+						className="grid_header grid_header_character"
+						onClick = {() => {
+					this.contentManager_.updateActiveGridType(GridTypeEnum.CHARACTER);
+				}}>
+					<div className="grid_header_content">
+						Characters
+					</div>
+				</div>
+				<div
+						className="grid_header grid_header_material"
+						onClick = {() => {
+					this.contentManager_.updateActiveGridType(GridTypeEnum.MATERIAL);
+				}}>
+					<div className="grid_header_content">
+						Materials
+					</div>
+				</div>
+				<div
+						className="grid_header grid_header_node"
+						onClick = {() => {
+					this.contentManager_.updateActiveGridType(GridTypeEnum.NODE);
+				}}>
+					<div className="grid_header_content">
+						Places
+					</div>
+				</div>
+				<div
+						className="grid_header grid_header_about"
+						onClick = {() => {
 					this.contentManager_.updateActiveGridType(GridTypeEnum.ABOUT);
 				}}>
-					About!
-				</button>
-				{this.renderGridType()}
+					<div className="grid_header_content">
+						About
+					</div>
+				</div>
+				<div className="grid_content">
+					{this.renderGridType()}
+				</div>
 			</div>
 		)
 	}

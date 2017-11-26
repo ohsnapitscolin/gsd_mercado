@@ -2,10 +2,14 @@ import React, { Component } from 'react';
 import $ from 'jquery';
 import PubSub from 'pubsub-js';
 
+import FilterData from './FilterData.js';
+
 
 class HistoryManager {
 	constructor(getHistoryFn) {
 		this.getHistoryFn_ = getHistoryFn;
+		this.searchParams_ = null;
+
 		this.parseHistory();
 	}
 
@@ -29,28 +33,37 @@ class HistoryManager {
 
 		const activeGrid = searchParams.get('grid') || null;
 		const activeNode = searchParams.get('node') || null;
+		const activeCharacter = searchParams.get('character') || null;
+		const activeMaterial = searchParams.get('material') || null;
 		const activeType = searchParams.get('type') || null;
 		const activeStory = searchParams.get('story') || null;
-		const activeFilter = searchParams.get('filter') || null;
+
+		const activeFilter = new FilterData(
+			searchParams.get('filter') || null,
+			searchParams.get('filtervalue') || null);
 
 		if (activeNode) {
-			this.setActiveNode(activeNode, false /* addToHistory */)
+			this.setActiveNode(activeNode);
+		} else if (activeCharacter) {
+			this.setActiveCharacter(activeCharacter);
+		} else if (activeMaterial) {
+			this.setActiveMaterial(activeMaterial);
 		} else if (activeType) {
-			this.setActiveType(activeType, false /* addToHistory */)
+			this.setActiveType(activeType);
 		} else if (activeStory) {
-			this.setActiveStory(activeStory, false /* addToHistory */)
+			this.setActiveStory(activeStory);
 		} else if (activeFilter) {
-			this.setActiveFilter(activeFilter, false /* addToHistory */)
+			this.setActiveFilter(activeFilter);
 		}
+		this.push(false);
 
 		console.log(searchParams.toString());
 	}
 
-	setActiveGrid(activeGrid, addToHistory) {
-		return this.setActiveParams(
+	setActiveGrid(activeGrid) {
+		this.setActiveParams(
 				{'grid': activeGrid},
-				addToHistory,
-				['node', 'type', 'story', 'filter'] /* keysToRemove */,
+				['map'],
 				true /* deleleteIfNull */);
 	}
 
@@ -58,11 +71,10 @@ class HistoryManager {
 		return this.getActiveParam('grid');
 	}
 
-	setActiveMap(activeMap, addToHistory) {
-		return this.setActiveParams(
+	setActiveMap(activeMap) {
+		this.setActiveParams(
 				{'map': activeMap},
-				addToHistory,
-				[] /* keysToRemove */,
+				null /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 
@@ -70,11 +82,10 @@ class HistoryManager {
 		return this.getActiveParam('map');
 	}
 
-	setActiveNode(activeNode, addToHistory) {
-		return this.setActiveParams(
+	setActiveNode(activeNode) {
+		this.setActiveParams(
 				{'node': activeNode, 'grid': 'node'},
-				addToHistory,
-				['type', 'story', 'filter'] /* keysToRemove */,
+				['map'] /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 
@@ -82,11 +93,32 @@ class HistoryManager {
 		return this.getActiveParam('node');
 	}
 
-	setActiveType(activeType, addToHistory) {
-		return this.setActiveParams(
+	setActiveCharacter(activeCharacter) {
+		this.setActiveParams(
+			{'character': activeCharacter, 'grid': 'character'},
+			['map'] /* keysToKeep */,
+			true /* deleleteIfNull */);
+	}
+
+	getActiveCharacter() {
+		return this.getActiveParam('character');
+	}
+
+	setActiveMaterial(activeMaterial) {
+		this.setActiveParams(
+			{'material': activeMaterial, 'grid': 'material'},
+			['map'] /* keysToKeep */,
+			true /* deleleteIfNull */);
+	}
+
+	getActiveMaterial() {
+		return this.getActiveParam('material');
+	}
+
+	setActiveType(activeType) {
+		this.setActiveParams(
 				{'type': activeType, 'grid': 'type'},
-				addToHistory,
-				['node', 'story', 'filter'] /* keysToRemove */,
+				['map'] /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 
@@ -94,11 +126,10 @@ class HistoryManager {
 		return this.getActiveParam('type');
 	}
 
-	setActiveStory(activeStory, addToHistory) {
-		return this.setActiveParams(
+	setActiveStory(activeStory) {
+		this.setActiveParams(
 				{'story': activeStory, 'grid': 'story'},
-				addToHistory,
-				['node', 'type', 'filter'] /* keysToRemove */,
+				['map'] /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 
@@ -106,65 +137,77 @@ class HistoryManager {
 		return this.getActiveParam('story');
 	}
 
-	setActiveFilter(activeFilter, addToHistory) {
-		return this.setActiveParams(
-				{'filter': activeFilter, 'grid': 'selection'},
-				addToHistory,
-				['node', 'type', 'story'] /* keysToRemove */,
+	setActiveFilter(activeFilter) {
+		const activeFilterType = activeFilter.getFilterType();
+		const activeFilterValue = activeFilter.getFilterValue();
+		this.setActiveParams(
+				{'filter': activeFilterType, 'filtervalue': activeFilterValue},
+				['grid', 'map']  /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 
 	getActiveFilter() {
-		return this.getActiveParam('filter');
+		return new FilterData(
+			this.getActiveParam('filter'), this.getActiveParam('filtervalue'));
 	}
 
-	setActiveParams(params, addToHistory, keysToRemove, deleteIfNull) {
+	setActiveParams(params, keysToKeep, deleteIfNull) {
 		const currentHistory = this.getHistory();
 		if (!currentHistory) {
 			return;
 		}
 
-		const currentSearchParams =
-				new URLSearchParams(currentHistory.location.search);
-		const searchParams =
+		this.searchParams_ = this.searchParams_ ||
 				new URLSearchParams(currentHistory.location.search);
 
-		let valueChanged = false;
-		Object.keys(params).forEach(function(key) {
+		const keysIterator = this.searchParams_.keys();
+		let step;
+		while (!(step = keysIterator.next()).done) {
+			const key = step.value;
+			if (!keysToKeep) {
+				break;
+			} else if (!keysToKeep.includes(key) &&
+					!Object.keys(params).includes(key)) {
+				this.searchParams_.delete(key);
+			}
+		}
+
+		Object.keys(params).forEach((key) => {
 			const value = params[key];
-			const currentValue = searchParams.get(key) || null;
-			if (!valueChanged) {
-				valueChanged = currentValue != value;
-			}
-
-			for (let i = 0; i < keysToRemove.length; i++) {
-				searchParams.delete(keysToRemove[i]);
-			}
-
 			if (value) {
-				searchParams.set(key, value);
+				this.searchParams_.set(key, value);
 			} else if (deleteIfNull) {
-				searchParams.delete(key);
+				this.searchParams_.delete(key);
 			}
 		});
+	}
 
-		if (currentSearchParams.toString() == searchParams.toString()) {
-			return valueChanged;
+	push(addToHistory) {
+		const currentHistory = this.getHistory();
+		if (!currentHistory || !this.searchParams_) {
+			return;
 		}
 
-		if (!addToHistory || !valueChanged) {
-			console.log('replace: ' + searchParams.toString());
+		const currentSearchParams =
+				new URLSearchParams(currentHistory.location.search);
+		const searchParmsString = this.searchParams_.toString();
+		this.searchParams_ = null;
+
+		if (currentSearchParams.toString() == searchParmsString) {
+			return;
+		}
+
+		if (!addToHistory) {
+			console.log('replace: ' + searchParmsString);
 			currentHistory.replace({
-				search: searchParams.toString()
+				search: searchParmsString
 			});
 		} else {
-			console.log('push: ' + searchParams.toString());
+			console.log('push: ' + searchParmsString);
 			currentHistory.push({
-				search: searchParams.toString()
+				search: searchParmsString
 			});
 		}
-
-		return valueChanged;
 	}
 
 	getActiveParam(key) {

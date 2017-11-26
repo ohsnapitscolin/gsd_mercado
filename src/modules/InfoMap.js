@@ -109,16 +109,17 @@ class InfoMap extends Component {
             focusPath = true;
           }
         }
-        return focusPath ? "black" : "";
+        return focusPath ? "white" : "";
       });
     }
     this.focusGraphNodes(typeIds);
   }
 
-  focusType(typeId, opt_activeTypeIds) {
+  focusType(typeId) {
+    const totalLength = 300;
     let typeIdsToHover = [typeId];
     for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("stroke", (d) => {
+      this.pathGroups_[path].each(function(d) {
         const startNode = d.properties.startNode;
         const endNode = d.properties.endNode;
 
@@ -130,11 +131,27 @@ class InfoMap extends Component {
           typeIdsToHover.push(startNode);
           focusPath = true;
         }
-        return focusPath ? "black" : "";
-      });
 
-      this.focusGraphNodes(typeIdsToHover);
+        if (focusPath) {
+          $(this).addClass("animated");
+          d3.select(this)
+            .attr("stroke-dasharray", (d) => { return totalLength + " " + totalLength; })
+            .attr("stroke-dashoffset", (d) => { return totalLength; })
+              .transition()
+              .duration((d) => {
+                return 2500;
+               })
+            .attr("stroke-dashoffset", 0)
+        } else {
+          $(this).removeClass("animated");
+          d3.select(this).attr("stroke-dashoffset", 0)
+            .attr("stroke-dasharray", null)
+            .transition()
+            .duration(0);
+        }
+      });
     }
+    this.focusGraphNodes(typeIdsToHover);
   }
 
   focusGraphNodes(typeIds) {
@@ -320,12 +337,6 @@ class InfoMap extends Component {
     // }
     // this.focusType(typeId);
     this.flyToNode(typeId);
-  }
-
-  clearFocusedNode() {
-    if (this.focusedTypeId_) {
-      this.unfocusType(this.focusedTypeId_);
-    }
   }
 
   render() {

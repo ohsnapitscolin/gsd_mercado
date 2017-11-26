@@ -1,72 +1,9 @@
 [
 	{
-		"storyId": "story_id_1",
-		"name": "Stroy 1",
+		"storyId": "story_test_1",
+		"name": "Story 1",
 		"nodes": [
-			"1id","4id","21id","31id","41id","51id","61id","2id","12id","22id","32id","42id","52id","62id"
-		]
-	},
-	{
-		"storyId": "story_id_2",
-		"name": "Story 2",
-		"nodes": [
-			"2id","12id","22id","32id","42id","52id","62id","3id","13id","23id","33id","43id","53id","63id"
-		]
-	},
-	{
-		"storyId": "story_id_3",
-		"name": "Story 3",
-		"nodes": [
-			"3id","13id","23id","33id","43id","53id","63id","4id","14id","24id","34id","44id","54id","64id"
-		]
-	},
-	{
-		"storyId": "story_id_4",
-		"name": "Story 4",
-		"nodes": [
-			"4id","14id","24id","34id","44id","54id","64id","5id","15id","25id","35id","45id","55id","65id"
-		]
-	},
-	{
-		"storyId": "story_id_5",
-		"name": "Story 5",
-		"nodes": [
-			"5id","15id","25id","35id","45id","55id","65id"
-		]
-	},
-	{
-		"storyId": "story_id_6",
-		"name": "Story 6",
-		"nodes": [
-			"6id","16id","26id","36id","46id","56id"
-		]
-	},
-	{
-		"storyId": "story_id_7",
-		"name": "Story 7",
-		"nodes": [
-			"7id","17id","27id","37id","47id","57id"
-		]
-	},
-	{
-		"storyId": "story_id_8",
-		"name": "Story 8",
-		"nodes": [
-			"8id","18id","28id","38id","48id","58id"
-		]
-	},
-	{
-		"storyId": "story_id_9",
-		"name": "Story 9",
-		"nodes": [
-			"9id","19id","29id","39id","49id","59id"
-		]
-	},
-	{
-		"storyId": "story_id_10",
-		"name": "Story 0",
-		"nodes": [
-			"10d","20id","30id","40id","50id","60id"
+			"test_node_1", "test_node_2", "test_node_3", "test_node_4", "test_node_5"
 		]
 	}
 ]

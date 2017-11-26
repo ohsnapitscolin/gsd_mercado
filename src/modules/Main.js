@@ -1,13 +1,14 @@
 import $ from 'jquery';
 import React, { Component } from 'react';
 import * as firebase from 'firebase';
+import PubSub from 'pubsub-js';
 
 import HistoryManager from './HistoryManager.js';
 import ContentManager from './ContentManager.js'
 import GridManager from './GridManager.js'
 import MapManager from './MapManager.js'
 
-import { ContentTypeEnum } from './ContentManager.js';
+import { GridTypeEnum, CONTENT_LOADED_EVENT } from './ContentManager.js';
 
 class Main extends Component {
 	constructor(props) {
@@ -18,17 +19,25 @@ class Main extends Component {
 		});
 
 		const nodesJson = require('../resources/nodes.json');
+    const characters = require('../resources/characters.json');
+    const materials = require('../resources/materials.json');
 		const storiesJson = require('../resources/stories.json');
     const typesJson = require('../resources/types.json');
 
 		this.contentManager_ = new ContentManager(
 				nodesJson,
+				characters,
+				materials,
 				storiesJson,
 				typesJson,
 				this.historyManager_);
 
 		this.gridManager_ = null;
 		this.mapManager_ = null;
+
+		this.tokens_ = [];
+		this.tokens_.push(PubSub.subscribe(
+				CONTENT_LOADED_EVENT, this.handleContentLoaded.bind(this)));
 	}
 
 	componentDidMount() {
@@ -38,6 +47,14 @@ class Main extends Component {
 		this.contentManager_.publishActiveParamChanges();
 	}
 
+	handleContentLoaded() {
+		setTimeout(() => {
+			$('#splashScreen').css({
+				visibility: 'hidden'
+			});
+		}, 200);
+	}
+
 	componentDidUpdate() {
 		this.contentManager_.publishActiveParamChanges();
 	}
@@ -45,6 +62,9 @@ class Main extends Component {
 	render() {
 		return(
 			<div className="home">
+				<div id='splashScreen'>
+					GSD_MERCADO
+				</div>
 	 			<div id="main_content">
 		      <GridManager
 		      		contentManager = {this.contentManager_}

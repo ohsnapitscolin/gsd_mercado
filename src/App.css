@@ -1,3 +1,7 @@
+::-webkit-scrollbar {
+    display: none;
+}
+
 html {
   height: 100%;
   min-height: 100%;
@@ -26,6 +30,19 @@ body {
   position:relative;
 }
 
+#splashScreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  z-index: 100;
+}
+
+#map_switch_button {
+  position: absolute;
+  z-index: 1;
+}
+
 .content {
   width: 100%;
   height: 100%;
@@ -52,6 +69,21 @@ svg {
   stroke: gray;
   stroke-width: 2px;
   vector-effect: non-scaling-stroke;
+}
+
+.lines.hovered {
+  cursor: pointer;
+  stroke: blue;
+  stroke-width: 3px;
+}
+
+.lines {
+  -webkit-transform: 1000ms; /* Safari */
+  transform: 1000ms;
+}
+
+.lines.animated {
+  stroke: green;
 }
 
 #geo_map_hover {
@@ -104,8 +136,16 @@ svg {
   background-color: pink;
 }
 
+.location_icon {
+  fill: green;
+}
+
 .geo_marker.hovered {
   background-color: blue;
+}
+
+.geo_marker.preview {
+  background-color: gray;
 }
 
 .geo_marker:hover {
@@ -114,8 +154,8 @@ svg {
 
 .info_marker {
   padding: 5px;
-  color: grey;
-  background-color: lightgrey;
+  color: black;
+  background-color: lightgray;
   max-width: 100px;
   overflow-x: hidden;
 }
@@ -128,14 +168,14 @@ svg {
   color: black;
 }
 
+.chapters {
+  height: 100%;
+}
+
 .story_scroll {
   height: 100%;
   overflow-y: scroll;
   scroll-snap-type: mandatory;
-}
-
-.story_scroll::-webkit-scrollbar {
-  display: none;
 }
 
 .segment_controller_wrapper {
@@ -189,8 +229,6 @@ svg {
   height: 15px;
 }
 
-
-
 .map_manager {
   position: absolute;
   top: 0;
@@ -201,14 +239,64 @@ svg {
 }
 
 .grid_manager {
+  border-right: 1px;
+  border-color: 1px;
   width: 50%;
   height: 100%;
-  background-color: #F0F0F0;
   position: absolute;
   left: 0;
   top: 0;
   overflow-y: scroll;
   z-index: 1;
+}
+
+.grid_content {
+  padding-top: 25px;
+  padding-bottom: 75px;
+  padding-left: 40px;
+  padding-right: 40px;
+  box-sizing: border-box;
+}
+
+.grid_header {
+  display: inline-block;
+  text-align: center;
+  width: 20%;
+  height: 40px;
+  line-height: 1em;
+}
+
+.grid_header_content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+}
+
+#grid_manager_node, .grid_header_node {
+  color: black;
+  background-color: #f8a1a3;
+}
+
+#grid_manager_story, .grid_header_story {
+  color: white;
+  background-color: #1e1a40;
+}
+
+#grid_manager_material, .grid_header_material {
+  color: white;
+  background-color: #e94141;
+}
+
+#grid_manager_character, .grid_header_character {
+  color: white;
+  background-color: #87153d;
+}
+
+#grid_manager_about, .grid_header_about {
+  color: black;
+  background-color: #F4C33D;
 }
 
 .grid_story {
@@ -275,18 +363,85 @@ svg {
   cursor: pointer;
 }
 
-.selection_node {
+.selection_image_container {
+  width: 100%;
+  padding: 10px;
+  height: 150px;
+  overflow-y: hidden;
+  box-sizing: border-box;
+}
+
+.selection_image {
+  width: 100%;
+}
+
+.selection {
+  text-align: center;
   color: white;
-  padding: 15px;
-  width: 150px;
-  height: 100px;
-  margin: 25px;
-  background-color: grey;
+  margin: 15px;
+  /*padding: 15px;*/
+  width: calc(25% - 30px);
+  height: 250px;
   display: inline-block;
   vertical-align: top;
+  box-sizing: border-box;
+/*  border-color: white;
+  border-style: solid;
+  border-width: .25px;*/
 }
 
-.selection_node.hovered {
-  background-color: lightgrey;
+.selection_node {
+  width: calc(50% - 30px);
+  background-color: #CB8486;
+}
+.selection_node:hover {
+  background-color: #1e1a40;
 }
 
+.selection_story {
+  background-color: #16132F;
+}
+.selection_story:hover {
+  background-color: #e94141;
+}
+
+.selection_material {
+  background-color: #AA3030;
+}
+.selection_material:hover {
+  background-color: #87153d;
+}
+
+
+.selection_character {
+  background-color: #63102D;
+}
+.selection_character:hover {
+  background-color: #f8a1a3;
+}
+
+.chapter {
+  height: 250px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+}
+
+.decision {
+  display:inline-block;
+  padding: 15px;
+  margin: 5px;
+  border-color: gray;
+  border-style: solid;
+  border-width: .1px;
+}
+
+.decision:hover {
+  background-color: #e94141;
+}
+
+.chapter.selected {
+  background-color: #16132F;
+}

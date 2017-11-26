@@ -2,10 +2,12 @@ import $ from 'jquery';
 import React, { Component } from 'react';
 import PubSub from 'pubsub-js';
 
+import NodeSelectionManager from './NodeSelectionManager.js';
+
 import {
+	GridTypeEnum,
 	FilterTypeEnum,
-	HOVER_NODE_EVENT,
-	UNHOVER_NODE_EVENT } from './ContentManager';
+	HOVER_CHANGE_EVENT } from './ContentManager';
 // import Selection from './Selection.js'
 
 
@@ -15,28 +17,33 @@ class SelectionManager extends Component {
 		this.contentManager_ = props.contentManager;
 
 		this.tokens_ = [];
-		this.tokens_.push(PubSub.subscribe(
-				HOVER_NODE_EVENT, this.handleHoverNode.bind(this)));
-		this.tokens_.push(PubSub.subscribe(
-				UNHOVER_NODE_EVENT, this.handleUnhoverNode.bind(this)));
+		// this.tokens_.push(PubSub.subscribe(
+		// 		HOVER_NODE_EVENT, this.handleHoverNode.bind(this)));
+		// this.tokens_.push(PubSub.subscribe(
+		// 		UNHOVER_NODE_EVENT, this.handleUnhoverNode.bind(this)));
 	}
 
 	componentDidMount() {
-		this.updateHovers();
+		// this.updateHovers();
 	}
 
 	componentDidUpdate() {
-		this.updateHovers();
+		// this.updateHovers();
 	}
 
   updateHovers() {
+  	if (this.props.selectionType != GridTypeEnum.NODE) {
+  		return;
+  	}
+
     const thisSelectionManager = this;
     $('.selection_node').each(function() {
-    	const nodeId = $(this).attr('id').split('_')[1];
-    	$(this).hover(() => {
-    		thisSelectionManager.contentManager_.hoverNode(nodeId);
-    	}, () => {
-    		thisSelectionManager.contentManager_.unhoverNode(nodeId);
+    	const nodeId = $(this).attr('id').split('-')[1];
+    	$(this).unbind('mouseenter').mouseenter(() => {
+    		thisSelectionManager.contentManager_.hoverNodeId(nodeId, true);
+    	})
+    	$(this).unbind('mouseleave').mouseleave(() => {
+    		thisSelectionManager.contentManager_.unhoverNodeId(nodeId, false);
     	});
     });
   }
@@ -114,18 +121,51 @@ class SelectionManager extends Component {
 
 	renderSelection() {
 		let grid = [];
-		const nodes = this.applyFilter(this.contentManager_.getNodes());
-		nodes.forEach((node) => {
-			const nodeId = node.getId()
+		let selection = [];
+		let clickFn = null;
+		let className = "selection_node";
+		switch(this.props.selectionType) {
+			case GridTypeEnum.NODE:
+				selection = this.contentManager_.getNodes();
+				clickFn = this.contentManager_.updateActiveNodeId;
+				className = "selection_node"
+				break;
+			case GridTypeEnum.CHARACTER:
+				selection = this.contentManager_.getCharacters();
+				clickFn = this.contentManager_.updateActiveCharacterId;
+				className = "selection_character"
+				break;
+			case GridTypeEnum.MATERIAL:
+				selection = this.contentManager_.getMaterials();
+				clickFn = this.contentManager_.updateActiveMaterialId;
+				className = "selection_material"
+				break;
+			case GridTypeEnum.TYPE:
+				selection = this.contentManager_.getTypes();
+				clickFn = this.contentManager_.updateActiveTypeId;
+				className = "selection_type"
+				break;
+			case GridTypeEnum.STORY:
+				selection = this.contentManager_.getStories();
+				clickFn = this.contentManager_.updateActiveStoryId;
+				className = "selection_story"
+				break;
+		}
+
+		selection.forEach((selection) => {
+			const selectionId = selection.getId();
 			grid.push(
         <div
-        		key={nodeId}
-        		className="selection_node"
-        		id={'selection_' + nodeId}
-        		onClick={() => {
-        			this.contentManager_.updateActiveNodeId(nodeId);
-        		}}>
-        	{node.getName()}
+        		key={selectionId}
+        		className={`selection ${className}`}
+        		id={'selection-' + selectionId}
+        		onClick={clickFn.bind(this.contentManager_, selectionId)}>
+        	<div className="selection_image_container">
+	        	<img
+	        		className="selection_image"
+	        		src={require("../resources/test_image1.jpg")}/>
+      		</div>
+        	{selection.getId()}
         </div>
       );
 		});
@@ -138,13 +178,21 @@ class SelectionManager extends Component {
 	}
 
 	render() {
-		return (
-			<div>
-				SelectionManager
-				{this.renderFilters()}
-				{this.renderSelection()}
-			</div>
-		);
+		if (this.props.selectionType == GridTypeEnum.NODE) {
+			return (
+				<div>
+					<NodeSelectionManager
+							contentManager = {this.contentManager_}
+							filterData = {this.props.filterType} />
+				</div>
+			);
+		} else {
+			return (
+				<div>
+					{this.renderSelection()}
+				</div>
+			);
+		}
 	}
 }
 

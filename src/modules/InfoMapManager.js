@@ -31,6 +31,15 @@ class InfoMapManager extends Component {
 		return Promise.resolve();
 	}
 
+	showFilteredNodes(nodes) {
+		this.infoMap_.setIgnoreHoverChanges(true);
+		let typeIds = [];
+		for (let i = 0; i < nodes.length; i++) {
+			typeIds.push(nodes[i].getTypeId());
+		}
+		this.infoMap_.resetFocus();
+		this.infoMap_.focusTypes(typeIds, true /* activeConnectionsOnly */);
+	}
 
 	handleActiveNodeChange(nodeId) {
 		const typeId = this.contentManager_.getNode(nodeId).getTypeId();
@@ -60,8 +69,26 @@ class InfoMapManager extends Component {
 		}
 	}
 
-	handleActiveFilterChange(filterType) {
+	handleActiveMaterialChange(materialId) {
+		this.infoMap_.setIgnoreHoverChanges(true);
+		this.infoMap_.resetFocus();
+		const typeIds = [];
+		const types = this.contentManager_.getTypesForMaterialId(materialId);
+		for (let i = 0; i < types.length; i++) {
+			typeIds.push(types[i].getId());
+		}
+		this.infoMap_.focusTypes(typeIds, true /* activeConnectionsOnly */);
+	}
 
+	handleActiveCharacterChange(characterId) {
+		this.infoMap_.setIgnoreHoverChanges(true);
+		this.infoMap_.resetFocus();
+		const typeIds = [];
+		const types = this.contentManager_.getTypesForCharacterId(characterId);
+		for (let i = 0; i < types.length; i++) {
+			typeIds.push(types[i].getId());
+		}
+		this.infoMap_.focusTypes(typeIds, true /* activeConnectionsOnly */);
 	}
 
 	resetActives() {
@@ -69,38 +96,51 @@ class InfoMapManager extends Component {
 		this.infoMap_.resetFocus();
 	}
 
-	handleHoverNode(nodeId) {
-		const typeId = this.contentManager_.getNode(nodeId).getTypeId();
+	handleHoverNode(geoId, typeId, flyTo) {
 		this.infoMap_.handleHoverNode(typeId);
-		this.infoMap_.flyToNode(typeId);
+		if (flyTo) {
+			this.infoMap_.flyToNode(typeId);
+		}
 	}
 
-	handleUnhoverNode(nodeId) {
-		const typeId = this.contentManager_.getNode(nodeId).getTypeId();
+	handleUnhoverNode(geoId, typeId, hideOnHover) {
 		this.infoMap_.handleUnhoverNode(typeId);
 	}
 
-	setFocusedNode(nodeId) {
-		this.infoMap_.setIgnoreHoverChanges(true);
-		const typeId = this.contentManager_.getNode(nodeId).getTypeId();
-		this.infoMap_.setFocusedNode(typeId);
+	renderChapters(renderedChapters) {
+		let typeIds = [];
+		for (let i = 0; i < renderedChapters.length; i++) {
+			const nodeId = renderedChapters[i].getNodeId();
+			const typeId = renderedChapters[i].getTypeId();
+			if (nodeId) {
+				typeIds.push(this.contentManager_.getNode(nodeId).getTypeId());
+			} else if (typeId) {
+				typeIds.push(typeId);
+			}
+		}
+		this.infoMap_.focusTypes(typeIds, true);
 	}
 
-	clearFocusedNode() {
-		this.infoMap_.clearFocusedNode();
+	setFocusedNode(nodeId) {
+		const typeId = this.contentManager_.getNode(nodeId).getTypeId();
+		this.setFocus(null /* geoId */, typeId);
+	}
+
+	setFocus(geoId, typeId) {
+		if (typeId) {
+			this.infoMap_.setIgnoreHoverChanges(true);
+			this.infoMap_.setFocusedNode(typeId);
+		}
 	}
 
 	render() {
 		return (
 			<div className = "info_map_manager">
-				<button onClick = {() => {
+				<button id= "map_switch_button" onClick = {() => {
 					this.contentManager_.updateActiveMapType(MapTypeEnum.GEO);
 				}}>
 					Geo!
 				</button>
-				<div>
-					InfoMapManager
-				</div>
 				<InfoMap
 					contentManager = {this.contentManager_}
 					ref = {(node) => { this.infoMap_ = node; }}

@@ -1,12 +1,28 @@
-import $ from 'jquery';
-import React, { Component } from 'react';
-
-class Node {
+class NodeData {
 	constructor(nodeObject) {
-		this.nodeId_ = nodeObject.nodeId;
-		this.geoId_ = nodeObject.geoId;
-		this.typeId_ = nodeObject.infoId;
-		this.name_ = nodeObject.name;
+		this.nodeId_ = nodeObject.id;
+		this.geoId_ = nodeObject.geoId || -1;
+		this.typeId_ = nodeObject.typeId || -1;
+		this.name_ = nodeObject.name || "Unknown Name";
+		this.workers_ = nodeObject.workers || -1;
+
+		this.materials_ = [];
+		this.materialIds_ = [];
+	}
+
+	setMaterials(materials) {
+		this.materials_ = materials;
+		for (let i = 0; i < materials.length; i++) {
+			this.materialIds_.push(materials[i].getId());
+		}
+	}
+
+	getMaterials() {
+		return this.materials_;
+	}
+
+	getMaterialIds() {
+		return this.materialIds_;
 	}
 
 	getId() {
@@ -22,8 +38,12 @@ class Node {
 	}
 
 	getName() {
-		return this.name_
+		return this.name_;
+	}
+
+	getWorkers() {
+		return this.workers_;
 	}
 }
 
-export default Node;
+export default NodeData;

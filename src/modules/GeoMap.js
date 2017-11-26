@@ -70,7 +70,7 @@ class GeoMap extends Component {
             const geoNode = new GeoNode(
               path.properties.geojsonId,
               GeoNodeTypeEnum.PATH,
-              undefined /* this.coordinates */,
+              this.getPathCoordinates(path) /* this.coordinates */,
               path);
             this.geoNodes_.set(geoNode.getGeoId(), geoNode);
           });
@@ -83,10 +83,24 @@ class GeoMap extends Component {
     });
   }
 
+  getPathCoordinates(path) {
+    const coordinates = path.geometry.coordinates;
+    if (!coordinates || !coordinates.length) {
+      return null;
+    }
+    const length = coordinates.length;
+    const lngLat = coordinates[Math.floor(length / 2)];
+    lngLat.splice(-1);
+    return lngLat;
+  }
+
   addPoints(geojson) {
     geojson.features.forEach((marker) => {
       const el = document.createElement('div');
+      // const img = $('<img class="location_icon">');
+      // img.attr('src', require("../resources/location_icon.svg"));
 
+      // img.appendTo($(el));
       $(el).attr('id', 'geo-' + marker.properties.geojsonId);
       $(el).attr('class', 'geo_marker');
 
@@ -99,9 +113,9 @@ class GeoMap extends Component {
       });
 
       $(el).hover(function() {
-        $(this).addClass('hovered');
+        $(this).addClass("hovered");
       }, function() {
-        $(this).removeClass('hovered');
+        $(this).removeClass("hovered");
       });
 
       // make a marker for each feature and add to the map
@@ -136,9 +150,10 @@ class GeoMap extends Component {
         .data(geojson.features)
         .enter().append("path")
           .attr("d", this.path_)
-          .attr('class', className)
+          .attr('class', `${className} hidden`)
           .attr('id', (d) => { return 'geo-' + d.properties.geojsonId; })
-          .style("visibility", "hidden");
+          .on('mouseover', function() {$(this).addClass("hovered") })
+          .on('mouseout', function() {$(this).removeClass("hovered") });
   }
 
   createMap() {
@@ -148,12 +163,12 @@ class GeoMap extends Component {
         container: 'geo_mapbox', // container id
         style: 'mapbox://styles/mapbox/light-v9',
         center: [-99.1332, 19.4326],
-        zoom: 12,
+        zoom: 10,
     });
 
-    this.map_.on("viewreset", () => { this.updatePaths(); });
-    this.map_.on("move", () => { this.updatePaths(); });
-
+    // this.map_.on("viewreset", () => { this.updatePaths(); });
+    this.map_.on("move", () => { this.updateActivePaths(); });
+    this.map_.on("moveend", () => { this.updatePaths(); });
     // this.map_.on("movestart", () => {
     //   this.svg_.classed("hidden", true);
     // });
@@ -192,18 +207,20 @@ class GeoMap extends Component {
   }
 
   updatePaths() {
-    // this.geoNodes_.forEach((geoNode) => {
-    //   if (geoNode.getGeoNodeType() == GeoNodeTypeEnum.PATH) {
-    //     this.geoNode.getPath().attr("d", this.path_);
-    //   }
-    // });
     for (let path in this.pathGroups_) {
       this.pathGroups_[path].attr("d", this.path_);
     }
   }
 
   updateActivePaths() {
-
+    const thisGeoMap = this;
+    for (let path in this.pathGroups_) {
+      this.pathGroups_[path].each(function(d) {
+        if (!$(this).hasClass("hidden")) {
+          d3.select(this).attr("d", thisGeoMap.path_);
+        }
+      });
+    }
   }
 
   // React component management
@@ -251,132 +268,132 @@ class GeoMap extends Component {
     return color;
   }
 
-  showGeoIds(geoIds) {
+  showGeoIds(geoIds, hideOthers) {
     $(".geo_marker").each(function() {
       const $marker = $(this);
       const geoId = $marker.attr('id').split('-')[1];
-      $marker.css({
-        'visibility': geoIds.includes(geoId) ? "visible" : "hidden"
-      });
+      if (geoIds.includes(geoId)) {
+        $marker.removeClass("hidden");
+      } else if (hideOthers) {
+        $marker.addClass("hidden");
+      }
     });
 
+    const thisGeoMap = this;
     for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("visibility", (d) => {
-        return geoIds.includes(d.properties.geojsonId)  ? "visible" : "hidden";
+      this.pathGroups_[path].attr("class", function(d) {
+        const geoId = d.properties.geojsonId;
+        if (hideOthers) {
+          return geoIds.includes(geoId) ?
+              thisGeoMap.showPath($(this)) : thisGeoMap.hidePath($(this));
+        } else {
+          return geoIds.includes(geoId) ?
+              thisGeoMap.showPath($(this)) : $(this).attr("class");
+        }
       });
     }
   }
 
-  filter(filterType) {
-    console.log(filterType);
-    if (filterType == FilterTypeEnum.NONE) {
-      this.showAllGeoNodes();
-    }
-    if (filterType == FilterTypeEnum.GREEN) {
-      this.updateColor('green')
-    }
-    if (filterType == FilterTypeEnum.RED) {
-      this.updateColor('red')
-    }
-    if (filterType == FilterTypeEnum.POPUPINFO) {
-      this.filterNullProperty('PopupInfo')
+  hideGeoIds(geoIds) {
+    $(".geo_marker").each(function() {
+      const $marker = $(this);
+      const geoId = $marker.attr('id').split('-')[1];
+      if (geoIds.includes(geoId)) {
+        $marker.addClass("hidden");
+      }
+    });
+
+    const thisGeoMap = this;
+    for (var path in this.pathGroups_) {
+      this.pathGroups_[path].attr("class", function(d) {
+        const geoId = d.properties.geojsonId;
+        return geoIds.includes(geoId) ?
+            thisGeoMap.hidePath($(this)) : $(this).attr("class");
+      });
     }
   }
 
   flyToNode(geoId) {
-    this.map_.easeTo({
-      center: this.geoNodes_.get(geoId + "").getCoordinates()
-    });
+    const geoNode = this.geoNodes_.get(geoId);
+    const coordinates = geoNode && geoNode.getCoordinates() || null;
+    if (coordinates) {
+      this.map_.easeTo({
+        center: coordinates
+      });
+    }
   }
 
-  animateLines() {
-    var linePath = this.pathGroups_['lines']
-    linePath.each(function(d) {
-      d.totalLength = this.getTotalLength();
-    });
+  animateGeoId(geoId) {
+    const totalLength = 500;
+    for (var path in this.pathGroups_) {
+      this.pathGroups_[path].each(function(d) {
+        if (d.properties.geojsonId == geoId) {
+          d3.select(this)
+            .attr("stroke-dasharray", (d) => { return totalLength + " " + totalLength; })
+            .attr("stroke-dashoffset", (d) => { return totalLength; })
+              .transition()
+              .duration((d) => {
+                return totalLength * 10;
+               })
+            .attr("stroke-dashoffset", 0);
+        }
+      });
+    }
+  }
 
-    linePath
-      .attr("stroke-dasharray", (d) => { return d.totalLength + " " + d.totalLength; })
-      .attr("stroke-dashoffset", (d) => { return d.totalLength; })
-      .transition()
-        .duration((d) => {
-          return d.totalLength * 10;
-        })
-        .attr("stroke-dashoffset", 0);
+  stopAnimation(geoId) {
+    for (var path in this.pathGroups_) {
+      this.pathGroups_[path].each(function(d) {
+        if (d.properties.geojsonId == geoId) {
+          d3.select(this)
+            .attr("stroke-dasharray", null)
+              .transition()
+              .duration(0);
+        }
+      });
+    }
   }
 
   showAllGeoNodes() {
     $(".geo_marker").each(function() {
-      $(this).css({
-        'visibility': 'visible'
-      })
+      $(this).removeClass("hidden");
     });
 
+    const thisGeoMap = this;
     for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("stroke", "");
-      this.pathGroups_[path].style("visibility", "visible");
+      this.pathGroups_[path].attr("class", function(d) {
+        return thisGeoMap.showPath($(this));
+      });
     };
   }
 
   hideAllGeoNodes() {
     $(".geo_marker").each(function() {
-      $(this).css({
-        'visibility': 'hidden'
-      })
+      $(this).addClass("hidden");
     });
 
+    const thisGeoMap = this;
     for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("stroke", "");
-      this.pathGroups_[path].style("visibility", "hidden");
+      this.pathGroups_[path].attr("class", function(d) {
+        return thisGeoMap.hidePath($(this));
+      });
     };
+  }
+
+  hidePath($path) {
+    $path.addClass('hidden');
+    return $path.attr('class');
+  }
+
+  showPath($path) {
+    $path.removeClass('hidden');
+    return $path.attr('class');
   }
 
   resetFocus() {
     $(".geo_marker").each(function() {
       $(this).removeClass('hovered');
     });
-  }
-
-  filterNullProperty(property) {
-    for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("visibility", (d) => {
-        return d.properties[property] == null ? "hidden" : "visible";
-      });
-    }
-  }
-
-  filterPropertyByValue(property, value) {
-    for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("visibility", (d) => {
-        return d.properties[property] != value ? "hidden" : "visible";
-      });
-    }
-  }
-
-  filterById(geoId) {
-    for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("visibility", (d) => {
-        return d.properties.geojsonId != geoId ? "hidden" : "visible";
-      });
-    }
-  }
-
-  updateData(data) {
-    console.log(data);
-    for (var path in this.pathGroups_) {
-      console.log(path);
-      if (path != data) {
-        this.pathGroups_[path].style('visibility', 'hidden');
-      } else {
-        this.pathGroups_[path].style('visibility', 'visible');
-      }
-    };
-  }
-
-  updateColor(color) {
-    for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("stroke", color);
-    };
   }
 
   completeLoad() {

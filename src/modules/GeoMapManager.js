@@ -30,10 +30,19 @@ class GeoMapManager extends Component {
 		return this.geoMap_.completeLoad();
 	}
 
+	showFilteredNodes(nodes) {
+		let geoIds = [];
+		for (let i = 0; i < nodes.length; i++) {
+			geoIds.push(nodes[i].getGeoId());
+		}
+		this.geoMap_.resetFocus();
+		this.geoMap_.showGeoIds(geoIds, true);
+	}
+
 	handleActiveNodeChange(nodeId) {
 		const geoId = this.contentManager_.getNode(nodeId).getGeoId();
 		this.geoMap_.resetFocus();
-		this.geoMap_.showGeoIds([geoId + ""]);
+		this.geoMap_.showGeoIds([geoId], true);
 		this.geoMap_.flyToNode(geoId);
 	}
 
@@ -41,18 +50,36 @@ class GeoMapManager extends Component {
 		const geoIds = [];
 		const nodes = this.contentManager_.getNodesForTypeId(typeId);
 		for (let i = 0; i < nodes.length; i++) {
-			geoIds.push(nodes[i].getGeoId() + "");
+			geoIds.push(nodes[i].getGeoId());
 		}
-		this.geoMap_.showGeoIds(geoIds);
+		this.geoMap_.showGeoIds(geoIds, true);
 	}
 
 	handleActiveStoryChange(storyId) {
 		const geoIds = [];
 		const nodes = this.contentManager_.getNodesForStoryId(storyId);
 		for (let i = 0; i < nodes.length; i++) {
-			geoIds.push(nodes[i].getGeoId() + "");
+			geoIds.push(nodes[i].getGeoId());
 		}
-		this.geoMap_.showGeoIds(geoIds);
+		this.geoMap_.showGeoIds(geoIds, true);
+	}
+
+	handleActiveMaterialChange(materialId) {
+		const geoIds = [];
+		const nodes = this.contentManager_.getNodesForMaterialId(materialId);
+		for (let i = 0; i < nodes.length; i++) {
+			geoIds.push(nodes[i].getGeoId());
+		}
+		this.geoMap_.showGeoIds(geoIds, true);
+	}
+
+	handleActiveCharacterChange(characterId) {
+		const geoIds = [];
+		const nodes = this.contentManager_.getNodesForCharacterId(characterId);
+		for (let i = 0; i < nodes.length; i++) {
+			geoIds.push(nodes[i].getGeoId());
+		}
+		this.geoMap_.showGeoIds(geoIds, true);
 	}
 
 	handleActiveFilterChange(filterType) {
@@ -63,30 +90,55 @@ class GeoMapManager extends Component {
 		this.geoMap_.hideAllGeoNodes();
 	}
 
-	handleHoverNode(nodeId, origin) {
-		const geoId = this.contentManager_.getNode(nodeId).getGeoId();
+	handleHoverNode(geoId, typeId, flyTo, preview) {
+		this.geoMap_.showGeoIds([geoId], false);
+		this.geoMap_.animateGeoId(geoId);
 		const $mapItem = $('#geo-' + geoId);
-		$mapItem.addClass('hovered');
-		this.geoMap_.flyToNode(geoId);
+		$mapItem.addClass(preview ? 'preview' : 'hovered');
+		if (flyTo) {
+			this.geoMap_.flyToNode(geoId);
+		}
 	}
 
-	handleUnhoverNode(nodeId, origin) {
-		const geoId = this.contentManager_.getNode(nodeId).getGeoId();
+	handleUnhoverNode(geoId, typeId, hideOnHover) {
+		if (hideOnHover) {
+			this.geoMap_.hideGeoIds([geoId], false);
+		}
+		this.geoMap_.stopAnimation(geoId);
 		const $mapItem = $('#geo-' + geoId);
 		$mapItem.removeClass('hovered');
+		$mapItem.removeClass('preview');
+	}
+
+	renderChapters(renderedChapters) {
+		let geoIds = [];
+		for (let i = 0; i < renderedChapters.length; i++) {
+			const nodeId = renderedChapters[i].getNodeId();
+			const geoId = renderedChapters[i].getGeoId();
+			if (nodeId) {
+				geoIds.push(this.contentManager_.getNode(nodeId).getGeoId());
+			} else if (geoId) {
+				geoIds.push(geoId);
+			}
+		}
+		this.geoMap_.showGeoIds(geoIds, false);
 	}
 
 	setFocusedNode(nodeId) {
 		const geoId = this.contentManager_.getNode(nodeId).getGeoId();
-		this.geoMap_.flyToNode(geoId);
+		this.setFocus(geoId, null /* typeId */);
 	}
 
-	clearFocusedNode() {}
+	setFocus(geoId, typeId) {
+		if (geoId) {
+			this.geoMap_.flyToNode(geoId);
+		}
+	}
 
 	render() {
 		return (
 			<div className="geo_map_manager">
-				<button className="map_button" onClick = {() => {
+				<button id="map_switch_button" className="map_button" onClick = {() => {
 					this.contentManager_.updateActiveMapType(MapTypeEnum.INFO);
 				}}>
 					Info!

@@ -12,16 +12,19 @@ var PathEnum = {
 class Navigation extends Component {
   render() {
     console.log('render');
+    // return (
+    //   <div className="navigation">
+    //     <Link id="home_link" to="/home" onClick={this.props.onClick}>
+    //       <div>Home</div>
+    //     </Link>
+    //     <Link id="notfound_link" to="/notfound" onClick={this.props.onClick}>
+    //       <div>Not Found</div>
+    //     </Link>
+    //   </div>
+    // );
     return (
-      <div className="navigation">
-        <Link id="home_link" to="/home" onClick={this.props.onClick}>
-          <div>Home</div>
-        </Link>
-        <Link id="notfound_link" to="/notfound" onClick={this.props.onClick}>
-          <div>Not Found</div>
-        </Link>
-      </div>
-    );
+      <div className="navigation"/>
+    )
   };
 
   // Should be called with this.props.location.pathname

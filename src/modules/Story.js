@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
 
+import ChapterData from './ChapterData.js';
+import Chapter from './Chapter';
+
 const StoryStateEnum = {
 	LOADING: 0,
 	IMAGES_LOADED: 1,

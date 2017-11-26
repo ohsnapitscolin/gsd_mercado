@@ -5,12 +5,12 @@ import PubSub from 'pubsub-js'
 import GeoMapManager from './GeoMapManager.js'
 import InfoMapManager from './InfoMapManager.js'
 import {
+	GridTypeEnum,
 	MapTypeEnum,
 	ACTIVE_PARAMS_CHANGE_EVENT,
-	HOVER_NODE_EVENT,
-	UNHOVER_NODE_EVENT,
-	FOCUSED_NODE_CHANGE_EVENT,
-	FOCUSED_TYPE_CHANGE_EVENT } from './ContentManager.js'
+	HOVER_CHANGE_EVENT,
+	FOCUS_CHANGE_EVENT,
+	RENDERED_CHAPTER_CHANGE_EVENT } from './ContentManager.js'
 
 class MapManager extends Component {
 	constructor(props) {
@@ -26,22 +26,17 @@ class MapManager extends Component {
 		// this.tokens_.push(PubSub.subscribe(
 		// 		ACTIVE_MAP_CHANGE_EVENT, this.handleActiveMapChange.bind(this)));
 		this.tokens_.push(PubSub.subscribe(
-				HOVER_NODE_EVENT, this.handleHoverNode.bind(this)));
-		this.tokens_.push(PubSub.subscribe(
-				UNHOVER_NODE_EVENT, this.handleUnhoverNode.bind(this)));
+				HOVER_CHANGE_EVENT, this.handleHoverChange.bind(this)));
 		this.tokens_.push(PubSub.subscribe(
 				ACTIVE_PARAMS_CHANGE_EVENT, this.handleActiveParamsChange.bind(this)));
 		this.tokens_.push(PubSub.subscribe(
-				FOCUSED_NODE_CHANGE_EVENT, this.handleFocusedNodeChange.bind(this)));
+				RENDERED_CHAPTER_CHANGE_EVENT,
+				this.handleRenderedChapterChange.bind(this)));
 		this.tokens_.push(PubSub.subscribe(
-				FOCUSED_TYPE_CHANGE_EVENT, this.handleFocusedTypeChange.bind(this)));
+				FOCUS_CHANGE_EVENT, this.handleFocusChange.bind(this)));
 
 		this.state = {
 			activeMapType: this.contentManager_.getActiveMapType(),
-			focusedNodeId: this.contentManager_.getActiveNodeId(),
-			focusedTypeId: this.contentManager_.getActiveTypeId(),
-			focusedStoryId: this.contentManager_.getActiveStoryId(),
-			focusedFilterId: this.contentManager_.getActiveFilterType()
 		};
 	}
 
@@ -51,10 +46,21 @@ class MapManager extends Component {
 
 	componentDidUpdate() {
 		this.updateCurrentManager();
-		const focusedNodeId = this.contentManager_.getFocusedNodeId();
-		if (focusedNodeId) {
+		this.updateFocus();
+		// if (focusedTypeId) {
+		// 	this.completeLoad().then(() => {
+		// 		this.currentManager_.setFocusedTypeId(focusedTypeId);
+		// 	});
+		// }
+		// if (focusedGeoId) {
+		// 	this.completeLoad().then(() => {
+		// 		this.currentManager_.setFocusedGeoId(focusedGeoId);
+		// 	});
+		// }
+		const renderedChapters = this.contentManager_.getRenderedChapters();
+		if (this.currentManager_ && renderedChapters.length) {
 			this.completeLoad().then(() => {
-				this.currentManager_.setFocusedNode(focusedNodeId);
+				this.currentManager_.renderChapters(renderedChapters);
 			});
 		}
 	}
@@ -72,6 +78,14 @@ class MapManager extends Component {
 		}
 	}
 
+	showMap() {
+		this.expand()
+	}
+
+	hideMap() {
+		this.contract()
+	}
+
   expand(timeout) {
     $('.map_manager').animate({width: '50%'}, timeout);
   }
@@ -80,33 +94,48 @@ class MapManager extends Component {
     $('.map_manager').animate({width: '0%'}, timeout);
   }
 
-	handleHoverNode(e, data) {
-		this.completeLoad().then(() => {
-			this.currentManager_.handleHoverNode(data.nodeId, data.origin);
-		});
-	}
+  handleHoverChange(e, data) {
+  	console.log("hover change!");
+		if (!this.currentManager_) {
+			return;
+		}
 
-	handleUnhoverNode(e, data) {
 		this.completeLoad().then(() => {
-			this.currentManager_.handleUnhoverNode(data.nodeId, data.origin);
+			if (data.isHovered) {
+				this.currentManager_.handleHoverNode(
+						data.geoId, data.typeId, data.flyTo, data.preview);
+			} else {
+				this.currentManager_.handleUnhoverNode(
+						data.geoId, data.typeId, data.hideOnHover);
+			}
 		});
-	}
+  }
 
 	handleActiveParamsChange(e, data) {
 		this.completeLoad().then(() => {
-
 			const mapTypeChanged = data.mapTypeChanged();
 			if (mapTypeChanged) {
 				this.handleActiveMapChange(this.contentManager_.getActiveMapType());
 			}
 
+			if (!this.currentManager_) {
+				return;
+			}
+
 			const activeStoryId = this.contentManager_.getActiveStoryId();
 			if ((data.storyIdChanged() || mapTypeChanged) && activeStoryId) {
-				this.currentManager_.handleActiveStoryChange(activeStoryId);
+				// this.currentManager_.handleActiveStoryChange(activeStoryId);
+				this.currentManager_.resetActives();
 			}
-			const activeFilterType = this.contentManager_.getActiveFilterType();
-			if ((data.filterTypeChanged() || mapTypeChanged) && activeFilterType) {
-				this.currentManager_.handleActiveFilterChange(activeFilterType);
+
+			const activeCharacterId = this.contentManager_.getActiveCharacterId();
+			if ((data.characterIdChanged() || mapTypeChanged) && activeCharacterId) {
+				this.currentManager_.handleActiveCharacterChange(activeCharacterId);
+			}
+
+			const activeMaterialId = this.contentManager_.getActiveMaterialId();
+			if ((data.materialIdChanged() || mapTypeChanged) && activeMaterialId) {
+				this.currentManager_.handleActiveMaterialChange(activeMaterialId);
 			}
 
 			const activeNodeId = this.contentManager_.getActiveNodeId()
@@ -119,8 +148,17 @@ class MapManager extends Component {
 				this.currentManager_.handleActiveTypeChange(activeTypeId);
 			}
 
-			if (!this.contentManager_.hasActiveBreakdown()) {
-				this.currentManager_.resetActives();
+			const activeGridType = this.contentManager_.getActiveGridType();
+			const activeFilterData = this.contentManager_.getActiveFilterData();
+			if (data.filterTypeChanged() || data.gridTypeChanged() ||
+					data.nodeIdChanged()) {
+				if (activeGridType == GridTypeEnum.NODE &&
+							!this.contentManager_.hasActiveBreakdown()) {
+					this.currentManager_.showFilteredNodes(
+							this.contentManager_.getFilteredNodes(activeFilterData));
+				} else if (!this.contentManager_.hasActiveBreakdown()) {
+					this.currentManager_.resetActives();
+				}
 			}
 		})
 	}
@@ -129,23 +167,48 @@ class MapManager extends Component {
 		this.setState({ activeMapType: mapType });
 	}
 
-	handleFocusedNodeChange(e, data) {
+	handleFocusChange(e, data) {
+		this.updateFocus();
+	}
+
+	updateFocus() {
+		if (!this.currentManager_) {
+			return;
+		}
+
 		this.completeLoad().then(() => {
-			const nodeId = data.nodeId;
-			if (!nodeId) {
-				this.currentManager_.clearFocusedNode();
+			if (this.contentManager_.getFocusedNodeId()) {
+				this.currentManager_.setFocusedNode(
+						this.contentManager_.getFocusedNodeId());
 			} else {
-				this.currentManager_.setFocusedNode(nodeId);
+				this.currentManager_.setFocus(
+					this.contentManager_.getFocusedGeoId(),
+					this.contentManager_.getFocusedTypeId());
 			}
 		});
 	}
 
-	handleFocusedTypeChange(e, data) {
+	handleRenderedChapterChange(e, data) {
+		if (!this.currentManager_) {
+			return;
+		}
 
+		const renderedChapters = data.renderedChapters
+		this.completeLoad().then(() => {
+			if (renderedChapters && renderedChapters.length) {
+				this.currentManager_.renderChapters(renderedChapters);
+			}
+		});
 	}
 
 	completeLoad() {
-		return this.currentManager_.completeLoad();
+		if (this.currentManager_) {
+			return this.currentManager_.completeLoad().then(() => {
+				this.contentManager_.maybeSetMapLoaded();
+			});
+		} else {
+			return Promise.resolve();
+		}
 	}
 
 	render() {
