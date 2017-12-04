@@ -2,7 +2,6 @@ import $ from 'jquery';
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import * as mapboxgl from 'mapbox-gl';
-import * as topojson from 'topojson-client';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import 'mapbox-gl/dist/svg/mapboxgl-ctrl-compass.svg';
@@ -10,25 +9,18 @@ import 'mapbox-gl/dist/svg/mapboxgl-ctrl-geolocate.svg';
 import 'mapbox-gl/dist/svg/mapboxgl-ctrl-zoom-in.svg';
 import 'mapbox-gl/dist/svg/mapboxgl-ctrl-zoom-out.svg';
 
-import { FilterTypeEnum } from './ContentManager.js';
 import GeoMapHover from './GeoMapHover.js';
 
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoib2hzbmFwaXRzY29saW4iLCJhIjoiY2o3bzkxZ2d1M2ZvajJ4bHh3NTdoMGVzOSJ9.ui98APpgyALQli44gDtXxg";
 
 const GeoNodeClassEnum = {
   POINTS: 'points',
-  LINES: 'lines'
+  GEO_PATH: 'geo_path'
 };
 
 const GeoNodeTypeEnum = {
   MARKER: 'marker',
   PATH: 'path'
-}
-
-const LoadingStateEnum = {
-  WAITING: 'waiting',
-  LOADING: 'loading',
-  LOADED: 'loaded'
 }
 
 
@@ -62,9 +54,9 @@ class GeoMap extends Component {
 
   importGeoJson(file, type) {
     return import(`../resources/geojson/${file}.json`).then((geojson) => {
-      const className = this.getClassForType(type);
+      const className = type;
       switch(className) {
-        case GeoNodeClassEnum.LINES:
+        case GeoNodeClassEnum.GEO_PATH:
           const geoPath = this.createGeoPath(geojson, className);
           geoPath.each((path, i) => {
             const geoNode = new GeoNode(
@@ -78,6 +70,8 @@ class GeoMap extends Component {
           break;
         case GeoNodeClassEnum.POINTS:
           this.addPoints(geojson);
+          break;
+        default:
           break;
       }
     });
@@ -104,7 +98,7 @@ class GeoMap extends Component {
       $(el).attr('id', 'geo-' + marker.properties.geojsonId);
       $(el).attr('class', 'geo_marker');
 
-      var lngLat = marker.geometry.coordinates.splice(-1);
+      marker.geometry.coordinates.splice(-1);
 
       const thisGeoMap = this;
       $(el).click(function() {
@@ -130,17 +124,6 @@ class GeoMap extends Component {
           undefined /* path */);
       this.geoNodes_.set(geoNode.getGeoId(), geoNode);
     });
-  }
-
-  getClassForType(type) {
-    switch(type) {
-      case "points":
-        return GeoNodeClassEnum.POINTS;
-      case "lines":
-        return GeoNodeClassEnum.LINES;
-      default:
-        throw new Error('Unknown GeoNode type: ' + type);
-    }
   }
 
   createGeoPath(geojson, className) {
@@ -247,15 +230,13 @@ class GeoMap extends Component {
 
   clickGeoId(geoId, $element) {
     const $geoMap = $('#geo_mapbox');
-    const node = this.contentManager_.getNodeByGeoId(geoId);
-
 
     this.mapHover_.showHover(
-        $geoMap.offset().top + $geoMap.height(),
-        $geoMap.offset().left + $geoMap.width(),
+        $geoMap.height(),
+        $geoMap.width(),
         $element.position().top,
         $element.position().left,
-        node);
+        geoId);
     // this.contentManager_.hoverNode(node.getId());
   }
 
@@ -315,7 +296,7 @@ class GeoMap extends Component {
 
   flyToNode(geoId) {
     const geoNode = this.geoNodes_.get(geoId);
-    const coordinates = geoNode && geoNode.getCoordinates() || null;
+    const coordinates = (geoNode && geoNode.getCoordinates()) || null;
     if (coordinates) {
       this.map_.easeTo({
         center: coordinates
@@ -327,9 +308,10 @@ class GeoMap extends Component {
     const totalLength = 500;
     for (var path in this.pathGroups_) {
       this.pathGroups_[path].each(function(d) {
-        if (d.properties.geojsonId == geoId) {
+        if (d.properties.geojsonId === geoId) {
           d3.select(this)
-            .attr("stroke-dasharray", (d) => { return totalLength + " " + totalLength; })
+            .attr("stroke-dasharray", (d) => {
+              return totalLength + " " + totalLength; })
             .attr("stroke-dashoffset", (d) => { return totalLength; })
               .transition()
               .duration((d) => {
@@ -344,7 +326,7 @@ class GeoMap extends Component {
   stopAnimation(geoId) {
     for (var path in this.pathGroups_) {
       this.pathGroups_[path].each(function(d) {
-        if (d.properties.geojsonId == geoId) {
+        if (d.properties.geojsonId === geoId) {
           d3.select(this)
             .attr("stroke-dasharray", null)
               .transition()
@@ -394,6 +376,12 @@ class GeoMap extends Component {
     $(".geo_marker").each(function() {
       $(this).removeClass('hovered');
     });
+
+    for (var path in this.pathGroups_) {
+      this.pathGroups_[path].each(function(d) {
+        $(this).removeClass('hovered');
+      });
+    }
   }
 
   completeLoad() {

@@ -45,62 +45,60 @@ class GeoMapHover extends Component {
 
 	unclick() {
 		if (this.state.visible) {
-			const node = this.state.node;
+			const nodeData =
+				this.contentManager_.getNodeByGeoId(this.state.geoId);
 			this.setState({ visible: false });
-			this.contentManager_.unhoverNode(node.getId());
+			this.contentManager_.unhoverNodeId(nodeData.getId());
 		}
 	}
 
-	showHover(mapBottom, mapRight, top, left, node) {
-		if (!node) {
-			return;
-		}
+	showHover(mapBottom, mapRight, top, left, geoId) {
+		const maxHoverWidth = 200;
+		const maxHoverHeight = 200;
 
-		const hoverWidth = $('#geo_map_hover').width();
-		const hoverHeight = $('#geo_map_hover').height();
-
-		if (left + hoverWidth > mapRight) {
-			left -= hoverWidth + 1;
+		if (left + maxHoverWidth > mapRight) {
+			left -= maxHoverWidth + 1;
 		} else {
 			left -= 1;
 		}
-		if (top + hoverHeight > mapBottom) {
-			top -= hoverHeight + 1;
+		if (top + maxHoverHeight > mapBottom) {
+			top -= maxHoverHeight + 1;
 		} else {
 			top -= 1;
 		}
 
 		this.setState({
+			geoId: geoId,
 			top: top,
 			left: left,
 			visible: true,
-			node: node,
 		});
 	}
 
 	clickNode() {
-		const node = this.state.node;
-		if (!node) {
+		const nodeData =
+				this.contentManager_.getNodeByGeoId(this.state.geoId);
+		if (!nodeData) {
 			return;
 		}
 		this.unclick();
-		this.contentManager_.updateActiveNodeId(node.getId());
+		this.contentManager_.updateActiveNodeId(nodeData.getId());
 	}
 
 	render() {
-		const node = this.state.node;
-		if (!node) {
+		const nodeData =
+				this.contentManager_.getNodeByGeoId(this.state.geoId);
+		if (!nodeData) {
 			return (<div/>);
 		}
 
 		return (
 			<div id='geo_map_hover'>
-				<h2> {node.getName()} </h2>
-				<h3> {node.getId()} </h3>
-				<h4> {node.getGeoId()} </h4>
+				<div> {nodeData.getName()} </div>
+				<div> {nodeData.getTypeId()} </div>
 				<button
 						onClick={() => { this.clickNode(); }}>
-					Click Me!
+					See More
 				</button>
 			</div>
 		);

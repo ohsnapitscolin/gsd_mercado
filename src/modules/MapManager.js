@@ -2,15 +2,16 @@ import $ from 'jquery';
 import React, { Component } from 'react';
 import PubSub from 'pubsub-js'
 
-import GeoMapManager from './GeoMapManager.js'
-import InfoMapManager from './InfoMapManager.js'
+import GeoMapManager from './GeoMapManager.js';
+import InfoMapManager from './InfoMapManager.js';
 import {
 	GridTypeEnum,
 	MapTypeEnum,
 	ACTIVE_PARAMS_CHANGE_EVENT,
 	HOVER_CHANGE_EVENT,
 	FOCUS_CHANGE_EVENT,
-	RENDERED_CHAPTER_CHANGE_EVENT } from './ContentManager.js'
+	RENDERED_CHAPTER_CHANGE_EVENT } from './ContentManager.js';
+import FilterManager from './FilterManager.js';
 
 class MapManager extends Component {
 	constructor(props) {
@@ -149,15 +150,23 @@ class MapManager extends Component {
 			}
 
 			const activeGridType = this.contentManager_.getActiveGridType();
-			const activeFilterData = this.contentManager_.getActiveFilterData();
+			const activeFilterMap = this.contentManager_.getActiveFilterMap();
 			if (data.filterTypeChanged() || data.gridTypeChanged() ||
 					data.nodeIdChanged()) {
-				if (activeGridType == GridTypeEnum.NODE &&
+				if (activeGridType === GridTypeEnum.NODE &&
 							!this.contentManager_.hasActiveBreakdown()) {
-					this.currentManager_.showFilteredNodes(
-							this.contentManager_.getFilteredNodes(activeFilterData));
+					this.currentManager_.showFilteredNodes(FilterManager.getFilteredNodes(
+							this.contentManager_, activeFilterMap));
 				} else if (!this.contentManager_.hasActiveBreakdown()) {
 					this.currentManager_.resetActives();
+				}
+			}
+
+			if(mapTypeChanged) {
+				if (activeGridType === GridTypeEnum.NODE &&
+							!this.contentManager_.hasActiveBreakdown()) {
+					this.currentManager_.showFilteredNodes(FilterManager.getFilteredNodes(
+							this.contentManager_, activeFilterMap));
 				}
 			}
 		})
@@ -216,11 +225,11 @@ class MapManager extends Component {
 			<div className="map_manager">
 				<GeoMapManager
 						contentManager = {this.contentManager_}
-						visible = {this.state.activeMapType == MapTypeEnum.GEO}
+						visible = {this.state.activeMapType === MapTypeEnum.GEO}
 						ref={(node) => { this.geoMapManager_ = node; }}/>
 				<InfoMapManager
 						contentManager = {this.contentManager_}
-						visible = {this.state.activeMapType == MapTypeEnum.INFO}
+						visible = {this.state.activeMapType === MapTypeEnum.INFO}
 						ref={(node) => { this.infoMapManager_ = node; }} />
 			</div>
 		)

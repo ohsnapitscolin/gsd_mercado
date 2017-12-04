@@ -1,28 +1,27 @@
-import React, { Component } from 'react';
 import $ from 'jquery';
-import { BrowserRouter, Route, Router, Switch } from 'react-router-dom'
-import * as firebase from 'firebase';
-import Main from './Main.js';
-import Edit from './Edit.js';
-import Navigation from './Navigation.js';
-import NotFound from './NotFound.js';
+// import * as firebase from 'firebase';
+
+import React, { Component } from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom'
+
 import '../App.css';
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-  }
+import Edit from './Edit.js';
+import Main from './Main.js';
+import Navigation from './Navigation.js';
+import NotFound from './NotFound.js';
 
+class App extends Component {
   componentWillMount() {
-    var config = {
-      apiKey: "AIzaSyAYKg_wG1d-8fKCgekMRD2bySxqg6KOtTU",
-      authDomain: "gsdmercado.firebaseapp.com",
-      databaseURL: "https://gsdmercado.firebaseio.com",
-      projectId: "gsdmercado",
-      storageBucket: "",
-      messagingSenderId: "267638384764"
-    };
-    firebase.initializeApp(config);
+    // var config = {
+    //   apiKey: "AIzaSyAYKg_wG1d-8fKCgekMRD2bySxqg6KOtTU",
+    //   authDomain: "gsdmercado.firebaseapp.com",
+    //   databaseURL: "https://gsdmercado.firebaseio.com",
+    //   projectId: "gsdmercado",
+    //   storageBucket: "",
+    //   messagingSenderId: "267638384764"
+    // };
+    // firebase.initializeApp(config);
   }
 
   render() {

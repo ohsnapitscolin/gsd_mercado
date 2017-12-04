@@ -1,14 +1,13 @@
 import $ from 'jquery';
-import React, { Component } from 'react';
-import * as firebase from 'firebase';
 import PubSub from 'pubsub-js';
+import React, { Component } from 'react';
 
+import ContentManager from './ContentManager.js';
+import GridManager from './GridManager.js';
 import HistoryManager from './HistoryManager.js';
-import ContentManager from './ContentManager.js'
-import GridManager from './GridManager.js'
-import MapManager from './MapManager.js'
+import MapManager from './MapManager.js';
 
-import { GridTypeEnum, CONTENT_LOADED_EVENT } from './ContentManager.js';
+import { CONTENT_LOADED_EVENT } from './ContentManager.js';
 
 class Main extends Component {
 	constructor(props) {

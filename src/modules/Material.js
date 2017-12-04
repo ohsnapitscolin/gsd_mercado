@@ -1,12 +1,41 @@
-import $ from 'jquery';
 import React, { Component } from 'react';
 
-import { GridTypeEnum } from './GridManager.js'
+import { ResourceStateEnum } from './ContentManager.js';
+import TextParser from './TextParser.js';
 
 class Material extends Component {
 	constructor(props) {
 		super(props)
 		this.contentManager_ = props.contentManager;
+
+		this.state = {
+			resourceState: ResourceStateEnum.LOADING
+		}
+
+		this.imageMap_ = new Map();
+		this.loadResources().then(() => {
+			this.setState({
+				resourceState: ResourceStateEnum.LOADED
+			});
+		});
+	}
+
+	loadResources() {
+		let resourcePromises = [];
+		const materialData = this.contentManager_.getMaterialData(
+				this.props.materialId);
+		const images = materialData.getImages();
+		for (let i = 0; i < images.length; i++) {
+			resourcePromises.push(this.importImage(this.props.materialId, images[i]));
+		}
+		return Promise.all(resourcePromises);
+	}
+
+	importImage(materialId, imageName) {
+		return import(`../resources/images/materials/${materialId}/${imageName}`)
+				.then((image) => {
+					this.imageMap_.set(imageName, image);
+				});
 	}
 
 	render() {
@@ -46,7 +75,8 @@ class Material extends Component {
 					{this.props.materialId}
 					<br/>
 					{materialData.getName()}
-					<br/>
+					{TextParser.parseText(
+							materialData.getText(), "material", this.imageMap_)} <br/>
 					{nodeButtons}
 					<br/>
 					{characterButtons}

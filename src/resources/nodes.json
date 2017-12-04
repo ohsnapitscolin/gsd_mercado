@@ -6,25 +6,37 @@
 		"typeId": "individual",
 		"name": "Test Node 1",
 		"workers": 5,
-		"separation_degree": [1, 2, 3]
+		"separation_degree": [1, 2, 3],
+		"text": "{type=image info=test_image1.jpg}",
+		"images": [
+			"test_image1.jpg"
+		]
 	},
 	{
 		"id": "test_node_2",
 		"materials": ["test_material_2"],
 		"geoId": "test_geo_2",
-		"typeId": "formal_commercial",
+		"typeId": "formal_street_sweeper",
 		"name": "Test Node 2",
+		"thumbnail": "",
+		"text": "",
 		"workers": 10,
-		"separation_degree": [2, 3]
+		"separation_degree": [2, 3],
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "test_node_3",
 		"materials": ["test_material_3", "test_material_4"],
 		"geoId": "test_geo_3",
-		"typeId": "informal_commercial",
+		"typeId": "trash_truck",
 		"name": "Test Node 3",
+		"thumbnail": "",
+		"text": "",
 		"workers": 15,
-		"separation_degree": [3]
+		"separation_degree": [3],
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "test_node_4",
@@ -32,8 +44,12 @@
 		"geoId": "test_geo_4",
 		"typeId": "individual",
 		"name": "Test Node 4",
+		"thumbnail": "",
+		"text": "",
 		"workers": 20,
-		"separation_degree": [4]
+		"separation_degree": [4],
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "test_node_5",
@@ -41,7 +57,10 @@
 		"geoId": "test_geo_5",
 		"typeId": "individual",
 		"name": "Test Node 5",
+		"thumbnail": "",
 		"workers": 25,
-		"separation_degree": [5]
+		"separation_degree": [5],
+		"text": "",
+		"images": []
 	}
 ]

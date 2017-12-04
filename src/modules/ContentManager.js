@@ -1,5 +1,3 @@
-import React, { Component } from 'react';
-import $ from 'jquery';
 import PubSub from 'pubsub-js';
 
 import ActiveParamChangeData from './ActiveParamChangeData.js';
@@ -24,35 +22,19 @@ export const GridTypeEnum = {
   ABOUT: 'about'
 };
 
-export const FilterTypeEnum = {
-	// General Filters
-	NONE: "none",
-	MATERIAL: "material",
-	TYPE: "type",
-
-	// Node Filters
-	SEPARATION: "separation",
-	CHARACTERS: "characters",
-
-	// Charcter Filters
-	FORMAILITY: "formatily",
-	PAY_TYPE: "pay_type",
-	LOCATION: "location",
-	JOB: "job"
-};
+export const ResourceStateEnum = {
+	LOADING: 0,
+	LOADED: 1
+}
 
 export const CONTENT_LOADED_EVENT = "contentLoadedEvent";
-
 export const ACTIVE_PARAMS_CHANGE_EVENT = "activeParamChangeEvent";
-
 export const HOVER_CHANGE_EVENT = "hoverChangeEvent";
 export const FOCUS_CHANGE_EVENT = "focusedNodeChangeEvent";
-
 export const RENDERED_CHAPTER_CHANGE_EVENT = "renderedChaptersChangeEvent";
 
 const DEFAULT_MAP_TYPE = MapTypeEnum.GEO;
 const DEFAULT_GRID_TYPE = GridTypeEnum.STORY;
-const DEFAULT_FILTER_TYPE = FilterTypeEnum.SEPARATION;
 
 
 class ContentManager {
@@ -77,7 +59,7 @@ class ContentManager {
 		this.typeMap_ = new Map();
 		this.typeToNodesMap_ = new Map();
 
-		this.loadNodes(
+		this.loadResources(
 				nodesJson, charactersJson, materialsJson, storiesJson, typesJson);
 
 		this.activeMapType_ = DEFAULT_MAP_TYPE;
@@ -88,7 +70,7 @@ class ContentManager {
 		this.activeMaterialId_ = null;
 		this.activeTypeId_ = null;
 		this.activeStoryId_ = null;
-		this.activeFilterData_ = null;
+		this.activeFilterMap_ = new Map();
 
 		this.historyManager_ = historyManager;
 
@@ -103,12 +85,19 @@ class ContentManager {
 		this.renderedChapterData_ = [];
 	}
 
-	loadNodes(nodesJson, charactersJson, materialsJson, storiesJson, typesJson) {
+	loadResources(nodesJson, charactersJson, materialsJson, storiesJson, typesJson) {
 		this.parseTypes(typesJson);
 		this.parseMaterials(materialsJson);
     this.parseNodes(nodesJson);
 		this.parseCharacters(charactersJson);
 		this.parseStories(storiesJson);
+	}
+
+	importImage(nodeId, imageName) {
+		return import(`../resources/images/nodes/${nodeId}/${imageName}`)
+				.then((image) => {
+					this.imageMap_.set(imageName, image);
+				});
 	}
 
 	parseTypes(typesJson) {
@@ -220,7 +209,6 @@ class ContentManager {
 
 			storyNode.setNodes(nodes);
 
-			console.log(storyNode);
 			const storyId = storyNode.getId();
 			this.storyMap_.set(storyId, storyNode);
 		}
@@ -260,6 +248,10 @@ class ContentManager {
 
 	getCharacterData(characterId) {
 		return this.characterMap_.get(characterId) || null;
+	}
+
+	getTypeData(typeId) {
+		return this.typeMap_.get(typeId) || null;
 	}
 
 	getTypesForStoryId(storyId) {
@@ -302,11 +294,6 @@ class ContentManager {
 		return characterData ? characterData.getNodes() : [];
 	}
 
-	getNodesForMaterialId(materialId) {
-		const materialData = this.getMaterialData(materialId);
-		return materialData ? materialData.getNodes() : [];
-	}
-
 	getCharactersForNodeId(nodeId) {
 		return this.nodeToCharactersMap_.get(nodeId) || [];
 	}
@@ -321,12 +308,12 @@ class ContentManager {
 		return characterData ? characterData.getMaterials() : [];
 	}
 
-	getCharactersForMaterialId(materialId) {
-		return this.materialsToCharactersMap_.get(materialId) || [];
-	}
-
 	getNodesForMaterialId(materialId) {
 		return this.materialsToNodesMap_.get(materialId) || [];
+	}
+
+	getCharactersForMaterialId(materialId) {
+		return this.materialsToCharactersMap_.get(materialId) || [];
 	}
 
 	getStoriesForNodeId(nodeId) {
@@ -386,40 +373,46 @@ class ContentManager {
 		this.historyManager_.push(true);
 	}
 
-	updateActiveFilterType(filterData) {
-		this.historyManager_.setActiveFilter(filterData);
-		this.historyManager_.push(true);
+	clearActiveFilters() {
+		this.historyManager_.clearActiveFilters();
+		this.historyManager_.push(false);
+	}
+
+	setActiveFilter(filterType, filterValue, clearExisting) {
+		this.historyManager_.setActiveFilter(
+				filterType, filterValue, clearExisting);
+		this.historyManager_.push(false);
 	}
 
 	publishActiveParamChanges() {
 		const activeMapType = this.getMapTypeFromParams();
-		const activeMapTypeChanged = this.activeMapType_ != activeMapType;
+		const activeMapTypeChanged = this.activeMapType_ !== activeMapType;
 		this.activeMapType_ = activeMapType;
 
 		const activeGridType = this.getGridTypeFromParams();
-		const activeGridTypeChanged = this.activeGridType_ != activeGridType;
+		const activeGridTypeChanged = this.activeGridType_ !== activeGridType;
 		this.activeGridType_ = activeGridType;
 
 		const activeNodeId = this.getNodeIdFromParams();
-		const activeNodeIdChanged = this.activeNodeId_ != activeNodeId;
+		const activeNodeIdChanged = this.activeNodeId_ !== activeNodeId;
 		this.activeNodeId_ = activeNodeId;
 
 		const activeCharacterId = this.getCharacterIdFromParams();
 		const activeCharacterIdChanged =
-				this.activeCharacterId_ != activeCharacterId;
+				this.activeCharacterId_ !== activeCharacterId;
 		this.activeCharacterId_ = activeCharacterId
 
 		const activeMaterialId = this.getMaterialIdFromParams();
 		const activematerialIdChanged =
-				this.activeMaterialId_ != activeMaterialId;
+				this.activeMaterialId_ !== activeMaterialId;
 		this.activeMaterialId_ = activeMaterialId;
 
 		const activeTypeId = this.getTypeIdFromParams();
-		const activeTypeIdChanged = this.activeTypeId_ != activeTypeId;
+		const activeTypeIdChanged = this.activeTypeId_ !== activeTypeId;
 		this.activeTypeId_ = activeTypeId;
 
 		const activeStoryId = this.getStoryIdFromParams();
-		const activeStoryIdChanged = this.activeStoryId_ != activeStoryId;
+		const activeStoryIdChanged = this.activeStoryId_ !== activeStoryId;
 		this.activeStoryId_ = activeStoryId;
 
 		if (!this.activeStoryId_ || activeStoryIdChanged) {
@@ -431,22 +424,16 @@ class ContentManager {
 			this.focusedNodeId_ = null;
 		}
 
-		const activeFilterData = this.getFilterDataFromParams();
-		let activeFilterDataChanged = false;
-		if (activeFilterData) {
-			const activeFilterType = activeFilterData.getFilterType();
-			const activeFilterValue = activeFilterData.getFilterValue();
-			if (this.activeFilterData_) {
-				activeFilterDataChanged =
-						this.activeFilterData_.getFilterType() != activeFilterType ||
-						this.activeFilterData_.getFilterValue() != activeFilterValue;
-			} else {
-				activeFilterDataChanged = true;
+		const activeFilterMap = this.getFilterMapFromParams();
+		let activeFilterMapChanged = false;
+		for (let pair of activeFilterMap) {
+			const param = pair[0];
+			if (activeFilterMap.get(param) !== this.activeFilterMap_.get(param)) {
+				activeFilterMapChanged = true;
+				break;
 			}
-		} else if (this.activeFilterData_) {
-			activeFilterDataChanged = true;
 		}
-		this.activeFilterData_ = activeFilterData;
+		this.activeFilterMap_ = activeFilterMap;
 
 		PubSub.publish(ACTIVE_PARAMS_CHANGE_EVENT, new ActiveParamChangeData(
 				activeMapTypeChanged,
@@ -456,7 +443,7 @@ class ContentManager {
 				activematerialIdChanged,
 				activeTypeIdChanged,
 				activeStoryIdChanged,
-				activeFilterDataChanged));
+				activeFilterMapChanged));
 	}
 
 	hoverNodeId(nodeId, flyTo, preview) {
@@ -500,7 +487,7 @@ class ContentManager {
 	}
 
 	setFocusedNodeId(nodeId) {
-		if (this.focusedNodeId_ != nodeId) {
+		if (this.focusedNodeId_ !== nodeId) {
 			this.focusedGeoId_ = null;
 			this.focusedTypeId_ = null;
 			this.focusedNodeId_ = nodeId;
@@ -533,7 +520,7 @@ class ContentManager {
 	}
 
 	setFocusedTypeId(typeId) {
-		if (this.focusedTypeId_ != typeId) {
+		if (this.focusedTypeId_ !== typeId) {
 			this.focusedNodeId_ = null;
 			this.focusedTypeId_ = typeId;
 			PubSub.publish(FOCUS_CHANGE_EVENT);
@@ -545,7 +532,7 @@ class ContentManager {
 	}
 
 	setFocusedGeoId(geoId) {
-		if (this.focusedGeoId_ != geoId) {
+		if (this.focusedGeoId_ !== geoId) {
 			this.focusedNodeId_ = null;
 			this.focusedGeoId_ = geoId;
 			PubSub.publish(FOCUS_CHANGE_EVENT);
@@ -597,8 +584,8 @@ class ContentManager {
 		return this.activeStoryId_;
 	}
 
-	getActiveFilterData() {
-		return this.activeFilterData_;
+	getActiveFilterMap() {
+		return this.activeFilterMap_;
 	}
 
 	hasActiveBreakdown() {
@@ -607,6 +594,15 @@ class ContentManager {
 				this.activeMaterialId_ ||
 				this.activeTypeId_ ||
 				this.activeStoryId_;
+	}
+
+	getDataIds() {
+		let keys = [];
+		keys = keys.concat(Array.from(this.getStories().keys()));
+		keys =keys.concat(Array.from(this.getCharacters().keys()));
+		keys = keys.concat(Array.from(this.getMaterials().keys()));
+		keys = keys.concat(Array.from(this.getNodes().keys()));
+		return keys;
 	}
 
 	// Handle history
@@ -629,6 +625,8 @@ class ContentManager {
 				break;
 			case GridTypeEnum.ABOUT:
 				displayMap = false;
+				break;
+			default:
 				break;
 		}
 
@@ -666,7 +664,6 @@ class ContentManager {
 
 	getStoryIdFromParams() {
 		const activeStoryId = this.historyManager_.getActiveStory();
-		console.log(activeStoryId);
 		const story = this.storyMap_.get(activeStoryId);
 		return story ? activeStoryId : null;
 	}
@@ -677,59 +674,8 @@ class ContentManager {
 		return type ? activeTypeId : null;
 	}
 
-	getFilterDataFromParams() {
-		const activeFilterData = this.historyManager_.getActiveFilter();
-		if (!activeFilterData) {
-			return null;
-		}
-		const activeFilterType = activeFilterData.getFilterType();
-		const isValidFilterType =
-				Object.values(FilterTypeEnum).indexOf(activeFilterType) > -1;
-
-		// const defaultFilterType =
-		// 		this.historyManager_.getActiveGrid() == GridTypeEnum.SELECTION ?
-		// 				DEFAULT_FILTER_TYPE : null;
-
-		return isValidFilterType ? activeFilterData : null;
-	}
-
-	// Filter Management
-
-	getFilteredNodes(filterData) {
-		const nodesArray = [];
-		this.getNodes().forEach((node) => {
-			nodesArray.push(node);
-		});
-		return this.applyNodeFilter(nodesArray, filterData);
-	}
-
-	applyNodeFilter(nodes, filterData) {
-		if (!filterData) {
-			return nodes;
-		}
-		const filterType = filterData.getFilterType();
-		const filterValue = filterData.getFilterValue();
-
-		if (filterType == FilterTypeEnum.NONE) {
-			return nodes;
-		}
-
-		let updatedNodes = [];
-		nodes.forEach((node) => {
-			switch(filterType) {
-				case FilterTypeEnum.MATERIAL:
-					if (node.getMaterialIds().includes(filterValue)) {
-						updatedNodes.push(node);
-					}
-					break;
-				case FilterTypeEnum.TYPE:
-					if (node.getTypeId() == filterValue) {
-						updatedNodes.push(node);
-					}
-					break;
-			}
-		});
-		return updatedNodes;
+	getFilterMapFromParams() {
+		return this.historyManager_.getActiveFilterMap();
 	}
 }
 

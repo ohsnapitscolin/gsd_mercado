@@ -1,6 +1,3 @@
-import $ from 'jquery';
-import React, { Component } from 'react';
-
 class StoryNode {
 	constructor(storyObject) {
 		this.storyId_ = storyObject.storyId;

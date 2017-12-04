@@ -6,6 +6,8 @@ class CharacterData {
 		this.job_ = characterObject.job || "Unknown Job";
 		this.payType_ = characterObject.pay_type || 0;
 		this.home_ = characterObject.home || "Unknown Home";
+		this.text_ = characterObject.text || "";
+		this.images_ = characterObject.images || [];
 
 		this.nodes_ = [];
 		this.materials_ = [];
@@ -49,6 +51,14 @@ class CharacterData {
 
 	getHome() {
 		return this.home_;
+	}
+
+	getText() {
+		return this.text_;
+	}
+
+	getImages() {
+		return this.images_;
 	}
 }
 

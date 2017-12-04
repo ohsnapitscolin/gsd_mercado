@@ -5,6 +5,8 @@ class NodeData {
 		this.typeId_ = nodeObject.typeId || -1;
 		this.name_ = nodeObject.name || "Unknown Name";
 		this.workers_ = nodeObject.workers || -1;
+		this.text_ = nodeObject.text || "";
+		this.images_ = nodeObject.images || [];
 
 		this.materials_ = [];
 		this.materialIds_ = [];
@@ -43,6 +45,14 @@ class NodeData {
 
 	getWorkers() {
 		return this.workers_;
+	}
+
+	getText() {
+		return this.text_;
+	}
+
+	getImages() {
+		return this.images_;
 	}
 }
 

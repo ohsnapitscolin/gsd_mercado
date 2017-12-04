@@ -96,15 +96,21 @@ class InfoMapManager extends Component {
 		this.infoMap_.resetFocus();
 	}
 
-	handleHoverNode(geoId, typeId, flyTo) {
+	handleHoverNode(geoId, typeId, flyTo, preview) {
 		this.infoMap_.handleHoverNode(typeId);
-		if (flyTo) {
+		if (preview) {
+			this.infoMap_.preview(typeId);
+		}
+		if (flyTo || preview) {
 			this.infoMap_.flyToNode(typeId);
 		}
 	}
 
 	handleUnhoverNode(geoId, typeId, hideOnHover) {
 		this.infoMap_.handleUnhoverNode(typeId);
+		if (hideOnHover) {
+			this.infoMap_.removePreview(typeId);
+		}
 	}
 
 	renderChapters(renderedChapters) {
@@ -129,7 +135,7 @@ class InfoMapManager extends Component {
 	setFocus(geoId, typeId) {
 		if (typeId) {
 			this.infoMap_.setIgnoreHoverChanges(true);
-			this.infoMap_.setFocusedNode(typeId);
+			this.infoMap_.flyToNode(typeId);
 		}
 	}
 

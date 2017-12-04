@@ -5,7 +5,6 @@ import PubSub from 'pubsub-js';
 import About from './About.js';
 import SelectionManager from './SelectionManager.js';
 import Story from './Story.js'
-import StoryNew from './StoryNew.js';
 import Type from './Type.js';
 import Node from './Node.js';
 import Character from './Character.js';
@@ -32,7 +31,7 @@ class GridManager extends Component {
 			materialId: null,
 			typeId: null,
 			storyId: null,
-			filterType: null
+			filterMap: new Map()
 		};
 
 		this.recentGridType_ = DEFAULT_GRID_TYPE;
@@ -48,7 +47,7 @@ class GridManager extends Component {
 			typeId: this.contentManager_.getActiveTypeId(),
 			storyId: this.contentManager_.getActiveStoryId() ? 'test_story_1' : null,
 			// storyId: this.contentManager_.getActiveStoryId(),
-			filterType: this.contentManager_.getActiveFilterData()
+			filterMap: this.contentManager_.getActiveFilterMap()
 		});
 
 		if (data.mapTypeChanged()) {
@@ -61,7 +60,7 @@ class GridManager extends Component {
 	}
 
 	style() {
-		if(this.contentManager_.getActiveMapType() == MapTypeEnum.NONE) {
+		if(this.contentManager_.getActiveMapType() === MapTypeEnum.NONE) {
 			this.expand();
 			this.expanded_ = true;
 		} else {
@@ -105,9 +104,7 @@ class GridManager extends Component {
 	}
 
 	renderGridType() {
-		console.log('renderGridType: ' + this.state);
-
-		if (this.state.gridType == GridTypeEnum.ABOUT) {
+		if (this.state.gridType === GridTypeEnum.ABOUT) {
 			return (
 				<About
 						contentManager = {this.contentManager_}
@@ -119,7 +116,7 @@ class GridManager extends Component {
 				<SelectionManager
 						contentManager = {this.contentManager_}
 						selectionType = {this.state.gridType}
-						filterType = {this.state.filterType} />
+						filterMap = {this.state.filterMap} />
 			);
 		}
 
@@ -159,15 +156,16 @@ class GridManager extends Component {
 			case GridTypeEnum.STORY:
 				return (
 					<div className="grid_story">
-						<StoryNew
+						<Story
 								contentManager = {this.contentManager_}
 								storyId = {this.state.storyId} />
 					</div>
 				);
-		}
-		return (
-			<div>Unknown GridManager</div>
-		);
+			default:
+				return (
+					<div>Unknown GridManager</div>
+				);
+			}
 	}
 
 	render() {

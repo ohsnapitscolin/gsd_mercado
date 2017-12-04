@@ -19,7 +19,7 @@ class InfoMap extends Component {
     this.mapHover_ = null;
     this.moveCounter_ = 0;
 
-    this.ignoreHoverChanges = false;
+    this.ignoreHoverChanges_ = false;
 
     this.graph_ = require('../resources/graph.json');
     console.log(this.graph_);
@@ -33,10 +33,12 @@ class InfoMap extends Component {
         this.maxWidthLevel_ = i;
       }
     }
+
+    this.focusedTypes_ = [];
   }
 
-  setIgnoreHoverChanges(ignoreHoverChnages) {
-    this.ignoreHoverChnages_ = ignoreHoverChnages;
+  setIgnoreHoverChanges(ignoreHoverChanges) {
+    this.ignoreHoverChanges_ = ignoreHoverChanges;
   }
 
   addPoints(node, color) {
@@ -74,7 +76,6 @@ class InfoMap extends Component {
         .enter().append("path")
           .attr("d", this.path_)
           .attr('class', className);
-          // .attr('id', (d) => { return 'geo_map_' + d.properties.geojsonId; });
   }
 
   handleHoverNode(typeId) {
@@ -85,17 +86,17 @@ class InfoMap extends Component {
     this.unhover(typeId);
   }
 
-
   hover(typeId) {
-    if (this.ignoreHoverChnages_) {
+    if (this.ignoreHoverChanges_) {
       return;
     }
     this.focusType(typeId);
   }
 
   focusTypes(typeIds, activeConnectionsOnly) {
+    this.focusedTypes_ = typeIds;
     for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("stroke", (d) => {
+      this.pathGroups_[path].each(function(d) {
         const startNode = d.properties.startNode;
         const endNode = d.properties.endNode;
 
@@ -109,14 +110,19 @@ class InfoMap extends Component {
             focusPath = true;
           }
         }
-        return focusPath ? "white" : "";
+
+        if (focusPath) {
+          $(this).addClass("animated");
+        } else {
+          $(this).removeClass("animated");
+        }
       });
     }
     this.focusGraphNodes(typeIds);
   }
 
   focusType(typeId) {
-    const totalLength = 300;
+    this.focusedTypes_ = [typeId];
     let typeIdsToHover = [typeId];
     for (var path in this.pathGroups_) {
       this.pathGroups_[path].each(function(d) {
@@ -124,30 +130,18 @@ class InfoMap extends Component {
         const endNode = d.properties.endNode;
 
         let focusPath = false;
-        if (startNode == typeId) {
+        if (startNode === typeId) {
           typeIdsToHover.push(endNode);
           focusPath = true;
-        } else if (endNode == typeId) {
+        } else if (endNode === typeId) {
           typeIdsToHover.push(startNode);
           focusPath = true;
         }
 
         if (focusPath) {
           $(this).addClass("animated");
-          d3.select(this)
-            .attr("stroke-dasharray", (d) => { return totalLength + " " + totalLength; })
-            .attr("stroke-dashoffset", (d) => { return totalLength; })
-              .transition()
-              .duration((d) => {
-                return 2500;
-               })
-            .attr("stroke-dashoffset", 0)
         } else {
           $(this).removeClass("animated");
-          d3.select(this).attr("stroke-dashoffset", 0)
-            .attr("stroke-dasharray", null)
-            .transition()
-            .duration(0);
         }
       });
     }
@@ -168,7 +162,7 @@ class InfoMap extends Component {
   }
 
   unhover(typeId) {
-    if (this.ignoreHoverChnages_) {
+    if (this.ignoreHoverChanges_) {
       return;
     }
     this.resetFocus(typeId);
@@ -176,8 +170,8 @@ class InfoMap extends Component {
 
   resetFocus() {
     for (var path in this.pathGroups_) {
-      this.pathGroups_[path].style("stroke", (d) => {
-        return "";
+      this.pathGroups_[path].each(function(d) {
+        $(this).removeClass("animated");
       });
     }
     for (let pair of this.graphNodes_) {
@@ -191,38 +185,23 @@ class InfoMap extends Component {
   }
 
   createMap() {
-    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
+    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+
+    const bounds = [
+        [-.5, -1], // Southwest coordinates
+        [.5, .5]  // Northeast coordinates
+    ];
 
     this.map_ = new mapboxgl.Map({
-        container: 'info_mapbox', // container id
-        style: 'mapbox://styles/mapbox/light-v9',
-        center: [0, -.15],
-        zoom: 10,
+      container: 'info_mapbox', // container id
+      style: 'mapbox://styles/mapbox/light-v9',
+      center: [0, -.15],
+      zoom: 10,
+      maxBounds: bounds
     });
 
     this.map_.on("viewreset", () => { this.updatePaths(); });
     this.map_.on("move", () => { this.updatePaths(); });
-
-    // this.map_.on("movestart", () => {
-    //   this.svg_.classed("hidden", true);
-    // });
-    // this.map_.on("moveend", () => {
-    //   this.svg_.classed("hidden", false);
-    //   this.updatePaths();
-    // });
-
-    // this.map_.on("move", () => {
-    //   console.log(this.moveCounter_);
-    //   if (this.moveCounter_ % 5 == 0) {
-    //     console.log('update');
-    //     this.updatePaths();
-    //   }
-    //   this.moveCounter_++;
-    // });
-    // this.map_.on("moveend", () => {
-    //   this.updatePaths();
-    //   this.moveCounter_ = 0;
-    // });
 
     const transform = d3.geoTransform({ point: projectPoint });
     this.path_ = d3.geoPath().projection(transform);
@@ -234,7 +213,6 @@ class InfoMap extends Component {
     }
 
     this.map_.scrollZoom.disable()
-    // this.map_.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
     const container =  this.map_.getCanvasContainer()
     this.svg_ = d3.select(container).append("svg");
@@ -307,6 +285,21 @@ class InfoMap extends Component {
     });
   }
 
+  preview(typeId) {
+    this.focusedTypes_.push(typeId);
+    this.focusTypes(this.focusedTypes_, true);
+  }
+
+  removePreview(typeId) {
+    const index = this.focusedTypes_.indexOf(typeId);
+    if (index < 0) {
+      return;
+    }
+    this.focusedTypes_.splice(index, 1);
+    this.resetFocus();
+    this.focusTypes(this.focusedTypes_, true);
+  }
+
   createGeoLine(startNode, endNode) {
     if (!this.geojsonLine_) {
       this.geojsonLine_ =
@@ -329,14 +322,6 @@ class InfoMap extends Component {
         }
       }
     );
-  }
-
-  setFocusedNode(typeId) {
-    // if (this.focusedTypeId_) {
-    //   this.unfocusType(this.focusedTypeId_);
-    // }
-    // this.focusType(typeId);
-    this.flyToNode(typeId);
   }
 
   render() {

@@ -1,6 +1,8 @@
 import $ from 'jquery';
 import React, { Component } from 'react';
 
+import TextParser from './TextParser.js';
+
 class Chapter extends Component {
 	constructor(props) {
 		super(props)
@@ -30,8 +32,8 @@ class Chapter extends Component {
 				typeId = (nodeData && nodeData.getTypeId()) || null;
 				geoId = (nodeData && nodeData.getGeoId()) || null;
 			} else {
-				let typeId = chapterData ? chapterData.getTypeId() : null;
-				let geoId = chapterData ? chapterData.getGeoId() : null;
+				typeId = chapterData ? chapterData.getTypeId() : null;
+				geoId = chapterData ? chapterData.getGeoId() : null;
 			}
 
 			$(this).hover(function() {
@@ -73,14 +75,16 @@ class Chapter extends Component {
 			<div
 					className="chapter"
 					id={"chapter-" + this.chapterData_.getId()}
-					hover
 					onClick={() => {
 						this.chapterManager_.setFocusedChapterId(
 								this.chapterData_.getId());
 					}}>
-				<div>
+				<div className="chapter_content">
 					{this.chapterData_.getId()} <br/>
-					{this.chapterData_.getText()} <br/>
+					{TextParser.parseText(
+							this.chapterData_.getText(),
+							"chapter",
+							this.chapterManager_.getImageMap())} <br/>
 					{decisions}
 				</div>
 			</div>

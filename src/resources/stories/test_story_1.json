@@ -1,13 +1,15 @@
 {
 	"id": "test_story_1",
 	"material": "test_material_1",
-	"images": [],
+	"images": [
+		"test_image1.jpg"
+	],
 	"chapters": [
 		{
 			"id": "test_chapter_1",
 			"geoId": "test_geo_5",
 			"typeId": "individual",
-			"text": "Buy “Vanidades” (a magazine) from OXXO",
+			"text": "Here's a content management example! With a {type=link info=# text=link}! And maybe an image? {type=image info=test_image1.jpg} and maybe a video? {type=video info=https://www.youtube.com/embed/kJQP7kiw5Fk}",
 			"decisions": [
 				{
 					"chapterId": "test_chapter_2",
@@ -25,11 +27,11 @@
 					"text": "Public recycling bin"
 				},
 				{
-					"chapterId": "test_chapter_3",
+					"chapterId": "test_chapter_4",
 					"text": "Home trash"
 				},
 				{
-					"chapterId": "test_chapter_3",
+					"chapterId": "test_chapter_5",
 					"text": "Brings to recollection center"
 				}
 			]

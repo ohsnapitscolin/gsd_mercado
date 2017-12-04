@@ -1,8 +1,4 @@
-import React, { Component } from 'react';
-import $ from 'jquery';
-import PubSub from 'pubsub-js';
-
-import FilterData from './FilterData.js';
+import { FilterParamEnum } from './FilterManager.js';
 
 
 class HistoryManager {
@@ -31,16 +27,13 @@ class HistoryManager {
 
 		const searchParams = new URLSearchParams(currentHistory.location.search);
 
-		const activeGrid = searchParams.get('grid') || null;
 		const activeNode = searchParams.get('node') || null;
 		const activeCharacter = searchParams.get('character') || null;
 		const activeMaterial = searchParams.get('material') || null;
 		const activeType = searchParams.get('type') || null;
 		const activeStory = searchParams.get('story') || null;
 
-		const activeFilter = new FilterData(
-			searchParams.get('filter') || null,
-			searchParams.get('filtervalue') || null);
+		const activeFilterMap = this.getActiveFilterMap();
 
 		if (activeNode) {
 			this.setActiveNode(activeNode);
@@ -52,8 +45,8 @@ class HistoryManager {
 			this.setActiveType(activeType);
 		} else if (activeStory) {
 			this.setActiveStory(activeStory);
-		} else if (activeFilter) {
-			this.setActiveFilter(activeFilter);
+		} else if (activeFilterMap.size > 0) {
+			this.setActiveFilterMap(activeFilterMap);
 		}
 		this.push(false);
 
@@ -137,18 +130,35 @@ class HistoryManager {
 		return this.getActiveParam('story');
 	}
 
-	setActiveFilter(activeFilter) {
-		const activeFilterType = activeFilter.getFilterType();
-		const activeFilterValue = activeFilter.getFilterValue();
+
+	setActiveFilter(fitlerType, filterValue, clearExisting) {
+		const activeFilterMap = !clearExisting ?
+				this.getActiveFilterMap() : new Map();
+		activeFilterMap.set(fitlerType, filterValue);
+		this.setActiveFilterMap(activeFilterMap);
+	}
+
+	clearActiveFilters() {
+		this.setActiveFilterMap(new Map());
+	}
+
+	setActiveFilterMap(activeFilterMap) {
+    const paramsObject = {};
+    for (let pair of activeFilterMap) {
+  		paramsObject[pair[0]] = pair[1];
+		}
 		this.setActiveParams(
-				{'filter': activeFilterType, 'filtervalue': activeFilterValue},
+				paramsObject,
 				['grid', 'map']  /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 
-	getActiveFilter() {
-		return new FilterData(
-			this.getActiveParam('filter'), this.getActiveParam('filtervalue'));
+	getActiveFilterMap() {
+		const activeFilterMap = new Map();
+		for (let param of Object.values(FilterParamEnum)) {
+			activeFilterMap.set(param, this.getActiveParam(param));
+		}
+		return activeFilterMap;
 	}
 
 	setActiveParams(params, keysToKeep, deleteIfNull) {
@@ -161,8 +171,8 @@ class HistoryManager {
 				new URLSearchParams(currentHistory.location.search);
 
 		const keysIterator = this.searchParams_.keys();
-		let step;
-		while (!(step = keysIterator.next()).done) {
+		let step = keysIterator.next();
+		while (!step.done) {
 			const key = step.value;
 			if (!keysToKeep) {
 				break;
@@ -170,6 +180,7 @@ class HistoryManager {
 					!Object.keys(params).includes(key)) {
 				this.searchParams_.delete(key);
 			}
+			step = keysIterator.next();
 		}
 
 		Object.keys(params).forEach((key) => {
@@ -193,7 +204,7 @@ class HistoryManager {
 		const searchParmsString = this.searchParams_.toString();
 		this.searchParams_ = null;
 
-		if (currentSearchParams.toString() == searchParmsString) {
+		if (currentSearchParams.toString() === searchParmsString) {
 			return;
 		}
 

@@ -7,7 +7,11 @@
 		"formality": 1,
 		"job": "test_job_1",
 		"pay_type": 1,
-		"home": "delegacion_1"
+		"home": "delegacion_1",
+		"text": "{type=image info=test_image1.jpg}",
+		"images": [
+			"test_image1.jpg"
+		]
 	},
 	{
 		"id": "test_character_2",
@@ -17,7 +21,9 @@
 		"formality": 2,
 		"job": "test_job_2",
 		"pay_type": 2,
-		"home": "delegacion_2"
+		"home": "delegacion_2",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "test_character_3",
@@ -27,7 +33,9 @@
 		"formality": 3,
 		"job": "test_job_3",
 		"pay_type": 1,
-		"home": "delegacion_3"
+		"home": "delegacion_3",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "test_character_4",
@@ -37,7 +45,9 @@
 		"formality": 4,
 		"job": "test_job_4",
 		"pay_type": 1,
-		"home": "delegacion_4"
+		"home": "delegacion_4",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "test_character_5",
@@ -47,6 +57,8 @@
 		"formality": 5,
 		"job": "test_job_5",
 		"pay_type": 1,
-		"home": "delegacion_5"
+		"home": "delegacion_5",
+		"text": "",
+		"images": []
 	}
 ]

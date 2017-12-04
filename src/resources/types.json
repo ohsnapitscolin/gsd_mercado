@@ -1,130 +1,196 @@
 [
 	{
 		"id": "tlatelolco",
-		"category": "lightblue"
+		"category": "lightblue",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "formal_commercial",
-		"category": "lightblue"
+		"category": "lightblue",
+		"text": "This is somme sample test for a formal commercial! {type=image info=test_image1.jpg}",
+		"images": [
+			"test_image1.jpg"
+		]
 	},
 	{
 		"id": "informal_commercial",
-		"category": "lightblue"
+		"category": "lightblue",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "individual",
-		"category": "lightblue"
+		"category": "lightblue",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "public_park",
-		"category": "lightblue"
+		"category": "lightblue",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "tlatelolco_electric_car",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "montones",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "chatarrero_perifoneo",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "formal_street_sweeper",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "electric_car",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "carrero_informal_collector",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "pepenadores",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "barrendero_cart_storage",
-		"category": "orange"
+		"category": "orange",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "mercado_de_trueque",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "chacharrero",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "small_recollection_center",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "tianguis",
-		"category": "yellow"
+		"category": "yellow",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "trash_truck_storage",
-		"category": "orange"
+		"category": "orange",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "trash_truck",
-		"category": "#00ced1"
+		"category": "#00ced1",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "tlatelolco_transfer_station",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "paper_nomadic_buyer",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "pet_nomadic_buyer",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "other_plastic_nomadic_buyer",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "metal_nomadic_buyer",
-		"category": "pink"
+		"category": "pink",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "transfer_station",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "paper_medium_recollection_center",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "plastic_medium_recollection_center",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "metal_medium_recollection_center",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "plastic_large_recollection_center",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "paper_large_recollection_center",
-		"category": "#3b72cc"
+		"category": "#3b72cc",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "foundry_ferrous",
-		"category": "white"
+		"category": "white",
+		"text": "",
+		"images": []
 	},
 	{
 		"id": "foundry_non_ferrous",
-		"category": "white"
+		"category": "white",
+		"text": "",
+		"images": []
 	}
 ]

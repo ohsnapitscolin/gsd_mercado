@@ -1,12 +1,41 @@
-import $ from 'jquery';
 import React, { Component } from 'react';
 
-import { GridTypeEnum } from './GridManager.js'
+import { ResourceStateEnum } from './ContentManager.js';
+import TextParser from './TextParser.js';
+
 
 class Node extends Component {
 	constructor(props) {
 		super(props)
 		this.contentManager_ = props.contentManager;
+
+		this.state = {
+			resourceState: ResourceStateEnum.LOADING
+		}
+
+		this.imageMap_ = new Map();
+		this.loadResources().then(() => {
+			this.setState({
+				resourceState: ResourceStateEnum.LOADED
+			});
+		});
+	}
+
+	loadResources() {
+		let resourcePromises = [];
+		const nodeData = this.contentManager_.getNodeData(this.props.nodeId);
+		const images = nodeData.getImages();
+		for (let i = 0; i < images.length; i++) {
+			resourcePromises.push(this.importImage(this.props.nodeId, images[i]));
+		}
+		return Promise.all(resourcePromises);
+	}
+
+	importImage(nodeId, imageName) {
+		return import(`../resources/images/nodes/${nodeId}/${imageName}`)
+				.then((image) => {
+					this.imageMap_.set(imageName, image);
+				});
 	}
 
 	render() {
@@ -59,6 +88,8 @@ class Node extends Component {
 					{this.props.nodeId} <br/>
 					{nodeData.getName()} <br/>
 					{nodeData.getWorkers()} <br/>
+					{TextParser.parseText(
+							nodeData.getText(), "node", this.imageMap_)} <br/>
 					{characterButtons} <br/>
 					{materialButtons} <br/>
 					{storyButtons}

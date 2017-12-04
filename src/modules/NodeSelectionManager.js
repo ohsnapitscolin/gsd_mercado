@@ -1,26 +1,13 @@
 import $ from 'jquery';
 import React, { Component } from 'react';
-import PubSub from 'pubsub-js';
 
-import {
-	GridTypeEnum,
-	FilterTypeEnum,
-	ACTIVE_PARAMS_CHANGE_EVENT,
-	HOVER_CHANGE_EVENT } from './ContentManager';
-
-import FilterData from './FilterData.js'
+import FilterManager, { FilterParamEnum } from './FilterManager.js';
 
 
 class NodeSelectionManager extends Component {
 	constructor(props) {
 		super(props)
 		this.contentManager_ = props.contentManager;
-
-		this.tokens_ = [];
-		// this.tokens_.push(PubSub.subscribe(
-		// 		HOVER_NODE_EVENT, this.handleHoverNode.bind(this)));
-		// this.tokens_.push(PubSub.subscribe(
-		// 		ACTIVE_PARAMS_CHANGE_EVENT, this.handleActiveParamsChange.bind(this)));
 	}
 
 	componentDidMount() {
@@ -56,78 +43,56 @@ class NodeSelectionManager extends Component {
 		$selectionItem.removeClass('hovered');
   }
 
-	handleActiveParamsChange(e, data) {
-		// this.setState({
-		// 	filterType:
-		// })
-	}
-
 	renderFilters() {
 		return (
 			<div id="filters">
-				<button
-	 		 			type="button"
-	 		 			onClick={() => {
-	 		 				this.contentManager_.updateActiveFilterType(
-	 		 						new FilterData(FilterTypeEnum.NONE));
-	 		 			}}>
-		 			None!
-	 			</button>
-				<button
-	 		 			type="button"
-	 		 			onClick={() => {
-	 		 				this.contentManager_.updateActiveFilterType(
-	 		 						new FilterData(FilterTypeEnum.MATERIAL, "test_material_2"));
-	 		 			}}>
-		 			Material
-	 			</button>
+	 			{FilterManager.renderMaterialFilter(this.contentManager_,
+	 				this.props.filterMap, "node", (materialId) => {
+	 		 				this.contentManager_.setActiveFilter(
+	 		 						FilterParamEnum.MATERIAL, materialId);
+		 				})}
+	 			{FilterManager.renderTypeFilter(
+		 				this.contentManager_, this.props.filterMap, "node", (typeId) => {
+	 		 				this.contentManager_.setActiveFilter(
+	 		 						FilterParamEnum.TYPE, typeId);
+		 				})}
+	 			{FilterManager.renderCharacterFilter(
+	 				this.contentManager_, this.props.filterMap, "node", (characterId) => {
+			 				this.contentManager_.setActiveFilter(
+			 						FilterParamEnum.CHARACTER, characterId);
+	 				})}
 	 			<button
 	 		 			type="button"
 	 		 			onClick={() => {
-	 		 				this.contentManager_.updateActiveFilterType(
-	 		 						new FilterData(FilterTypeEnum.TYPE, "individual"));
-	 		 			}}>
-		 			Type
-	 			</button>
-	 			<button
-	 		 			type="button"
-	 		 			onClick={() => {
-	 		 				this.contentManager_.updateActiveFilterType(
-	 		 						new FilterData(FilterTypeEnum.SEPARATION, 3));
+	 		 				this.contentManager_.setActiveFilter(
+	 		 						FilterParamEnum.SEPARATION, 3);
 	 		 			}}>
 		 			Separation
 	 			</button>
-	 			<button
-	 		 			type="button"
-	 		 			onClick={() => {
-	 		 				this.contentManager_.updateActiveFilterType(
-	 		 						new FilterData(FilterTypeEnum.CHARACTERS, 2));
-	 		 			}}>
-		 			Character
-	 			</button>
-	 			<div>
-	 				{this.props.filterType}
-	 			</div>
 			</div>
 		)
 	}
 
 	renderSelection() {
 		let grid = [];
-		let nodes = this.contentManager_.getFilteredNodes(this.props.filterData);
+		let nodes = FilterManager.getFilteredNodes(
+				this.contentManager_, this.props.filterMap);
 
 		nodes.forEach((nodeData) => {
 			const nodeId = nodeData.getId();
 			grid.push(
         <div
-        		key = {nodeId}
+        		key={nodeId}
         		className={"selection selection_node"}
-        		id = {'selection-' + nodeId}
-        		onClick = {() => { this.contentManager_.updateActiveNodeId(); }}>
+        		id={'selection-' + nodeId}
+        		onClick={() => {
+        				this.contentManager_.updateActiveNodeId(nodeId); }}>
         	<div className="selection_image_container">
 	        	<img
+	        		key={`${nodeId}_thumbnail`}
 	        		className="selection_image"
-	        		src={require("../resources/test_image1.jpg")}/>
+	        		src={this.props.imageMap.get(nodeId)}
+	        		alt={`${nodeId}_thumbnail`} />
       		</div>
         	{nodeData.getName()}
         </div>
