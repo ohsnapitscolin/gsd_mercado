@@ -1,0 +1,13 @@
+[
+	{
+		"property": "salarios_a",
+		"map": {
+			"lower": 1000,
+			"low": 5000,
+			"mid": 10000,
+			"high": 15000,
+			"higher": 20000,
+			"highest": 100000
+		}
+	}
+]
