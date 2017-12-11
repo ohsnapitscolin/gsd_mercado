@@ -123,6 +123,11 @@ class MapManager extends Component {
 				return;
 			}
 
+			if(data.overlayChanged()) {
+				this.currentManager_.handleActiveOverlayChange(
+					this.contentManager_.getActiveOverlay());
+			}
+
 			const activeStoryId = this.contentManager_.getActiveStoryId();
 			if ((data.storyIdChanged() || mapTypeChanged) && activeStoryId) {
 				// this.currentManager_.handleActiveStoryChange(activeStoryId);

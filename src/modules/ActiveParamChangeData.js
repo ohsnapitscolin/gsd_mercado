@@ -6,7 +6,8 @@ class ActiveParamChangeData {
 			materialIdChanged,
 			typeIdChanged,
 			storyIdChanged,
-			filterTypeChanged) {
+			filterTypeChanged,
+			overlayChanged) {
 		this.mapTypeChanged_ = mapTypeChanged;
 		this.gridTypeChanged_ = gridTypeChanged;
 		this.nodeIdChanged_ = nodeIdChanged;
@@ -15,6 +16,7 @@ class ActiveParamChangeData {
 		this.typeIdChanged_ = typeIdChanged;
 		this.storyIdChanged_ = storyIdChanged;
 		this.filterTypeChanged_ = filterTypeChanged;
+		this.overlayChanged_ = overlayChanged
 	}
 
 	mapTypeChanged() {
@@ -46,7 +48,11 @@ class ActiveParamChangeData {
 	}
 
 	filterTypeChanged() {
-		return this.filterTypeChanged_
+		return this.filterTypeChanged_;
+	}
+
+	overlayChanged() {
+		return this.overlayChanged_;
 	}
 }
 

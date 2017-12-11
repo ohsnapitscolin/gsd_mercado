@@ -7,6 +7,10 @@
 		{
 			"file": "lines",
 			"type": "geo_path"
+		},
+		{
+			"file": "forcolin",
+			"type": "delegacion"
 		}
 	]
 }

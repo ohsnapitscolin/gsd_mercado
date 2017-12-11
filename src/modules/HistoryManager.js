@@ -32,6 +32,7 @@ class HistoryManager {
 		const activeMaterial = searchParams.get('material') || null;
 		const activeType = searchParams.get('type') || null;
 		const activeStory = searchParams.get('story') || null;
+		const activeOverlay = searchParams.get('overlay') || null;
 
 		const activeFilterMap = this.getActiveFilterMap();
 
@@ -56,7 +57,7 @@ class HistoryManager {
 	setActiveGrid(activeGrid) {
 		this.setActiveParams(
 				{'grid': activeGrid},
-				['map'],
+				['map', 'overlay'],
 				true /* deleleteIfNull */);
 	}
 
@@ -75,10 +76,21 @@ class HistoryManager {
 		return this.getActiveParam('map');
 	}
 
+	setActiveOverlay(activeOverlay) {
+		this.setActiveParams(
+				{'overlay': activeOverlay},
+				null /* keysToKeep */,
+				true /* deleleteIfNull */);
+	}
+
+	getActiveOverlay() {
+		return this.getActiveParam('overlay');
+	}
+
 	setActiveNode(activeNode) {
 		this.setActiveParams(
 				{'node': activeNode, 'grid': 'node'},
-				['map'] /* keysToKeep */,
+				['map', 'overlay'] /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 
@@ -89,7 +101,7 @@ class HistoryManager {
 	setActiveCharacter(activeCharacter) {
 		this.setActiveParams(
 			{'character': activeCharacter, 'grid': 'character'},
-			['map'] /* keysToKeep */,
+			['map', 'overlay'] /* keysToKeep */,
 			true /* deleleteIfNull */);
 	}
 
@@ -100,7 +112,7 @@ class HistoryManager {
 	setActiveMaterial(activeMaterial) {
 		this.setActiveParams(
 			{'material': activeMaterial, 'grid': 'material'},
-			['map'] /* keysToKeep */,
+			['map', 'overlay'] /* keysToKeep */,
 			true /* deleleteIfNull */);
 	}
 
@@ -111,7 +123,7 @@ class HistoryManager {
 	setActiveType(activeType) {
 		this.setActiveParams(
 				{'type': activeType, 'grid': 'type'},
-				['map'] /* keysToKeep */,
+				['map', 'overlay'] /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 
@@ -122,7 +134,7 @@ class HistoryManager {
 	setActiveStory(activeStory) {
 		this.setActiveParams(
 				{'story': activeStory, 'grid': 'story'},
-				['map'] /* keysToKeep */,
+				['map', 'overlay'] /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 
@@ -149,7 +161,7 @@ class HistoryManager {
 		}
 		this.setActiveParams(
 				paramsObject,
-				['grid', 'map']  /* keysToKeep */,
+				['grid', 'map', 'overlay']  /* keysToKeep */,
 				true /* deleleteIfNull */);
 	}
 

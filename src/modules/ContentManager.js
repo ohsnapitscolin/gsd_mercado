@@ -71,6 +71,7 @@ class ContentManager {
 		this.activeTypeId_ = null;
 		this.activeStoryId_ = null;
 		this.activeFilterMap_ = new Map();
+		this.activeOverlay_ = null;
 
 		this.historyManager_ = historyManager;
 
@@ -384,6 +385,11 @@ class ContentManager {
 		this.historyManager_.push(false);
 	}
 
+	updateActiveOverlay(overlay) {
+		this.historyManager_.setActiveOverlay(overlay);
+		this.historyManager_.push(true);
+	}
+
 	publishActiveParamChanges() {
 		const activeMapType = this.getMapTypeFromParams();
 		const activeMapTypeChanged = this.activeMapType_ !== activeMapType;
@@ -415,6 +421,10 @@ class ContentManager {
 		const activeStoryIdChanged = this.activeStoryId_ !== activeStoryId;
 		this.activeStoryId_ = activeStoryId;
 
+		const activeOverlay = this.getOverlayFromParams();
+		const activeOverlayChanged = this.activeOverlay_ !== activeOverlay;
+		this.activeOverlay_ = activeOverlay;
+
 		if (!this.activeStoryId_ || activeStoryIdChanged) {
 			this.renderedChapterData_ = [];
 		}
@@ -443,7 +453,8 @@ class ContentManager {
 				activematerialIdChanged,
 				activeTypeIdChanged,
 				activeStoryIdChanged,
-				activeFilterMapChanged));
+				activeFilterMapChanged,
+				activeOverlayChanged));
 	}
 
 	hoverNodeId(nodeId, flyTo, preview) {
@@ -588,6 +599,10 @@ class ContentManager {
 		return this.activeFilterMap_;
 	}
 
+	getActiveOverlay() {
+		return this.activeOverlay_;
+	}
+
 	hasActiveBreakdown() {
 		return this.activeNodeId_ ||
 				this.activeCharacterId_ ||
@@ -676,6 +691,10 @@ class ContentManager {
 
 	getFilterMapFromParams() {
 		return this.historyManager_.getActiveFilterMap();
+	}
+
+	getOverlayFromParams() {
+		return this.historyManager_.getActiveOverlay();
 	}
 }
 

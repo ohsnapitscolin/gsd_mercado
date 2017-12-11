@@ -43,6 +43,11 @@ body {
   z-index: 1;
 }
 
+.geo_map_buttons {
+  position: absolute;
+  z-index: 1;
+}
+
 .content {
   width: 100%;
   height: 100%;
@@ -61,11 +66,8 @@ svg {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
-
-
-
 
 .geo_path {
   fill: none;
@@ -89,6 +91,55 @@ svg {
   stroke: gray;
   stroke-width: 2px;
   vector-effect: non-scaling-stroke;
+}
+
+.info {
+  position: absolute;
+  z-index: 150;
+}
+
+.delegacion {
+  display: none;
+  fill: orange;
+  fill-opacity: .35;
+  stroke: lightgrey;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.delegacion.active {
+  display: block;
+}
+
+.delegacion.hovered {
+  fill-opacity: .50;
+}
+
+.overlay_labels {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 200;
+  margin: 10px 50px 0 0;
+  padding: 5px;
+  background-color: white;
+}
+
+.overlay_icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 10px
+}
+
+.overlay_title {
+  display: inline-block;
+  padding-right: 10px;
+  width: 50px;
+}
+
+.overlay_value {
+  display: inline-block;
 }
 
 .lines.animated {

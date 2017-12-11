@@ -86,6 +86,10 @@ class GeoMapManager extends Component {
 		this.geoMap_.filter(filterType);
 	}
 
+	handleActiveOverlayChange(overlay) {
+		this.geoMap_.updateOverlays(overlay);
+	}
+
 	resetActives() {
 		this.geoMap_.hideAllGeoNodes();
 	}
@@ -138,11 +142,23 @@ class GeoMapManager extends Component {
 	render() {
 		return (
 			<div className="geo_map_manager">
-				<button id="map_switch_button" className="map_button" onClick = {() => {
-					this.contentManager_.updateActiveMapType(MapTypeEnum.INFO);
-				}}>
-					Info!
-				</button>
+				<div className="geo_map_buttons">
+					<button className="geo_map_button" onClick = {() => {
+						this.contentManager_.updateActiveMapType(MapTypeEnum.INFO);
+					}}>
+						Info!
+					</button>
+					<button className="geo_map_button" onClick = {() => {
+						this.contentManager_.updateActiveOverlay("salarios_a");
+					}}>
+						Overlay!
+					</button>
+					<button className="geo_map_button" onClick = {() => {
+						this.contentManager_.updateActiveOverlay(null);
+					}}>
+						Hide!
+					</button>
+				</div>
 				<GeoMap
 						contentManager = {this.contentManager_}
 						ref={(node) => { this.geoMap_ = node; }} />

@@ -91,6 +91,8 @@ class InfoMapManager extends Component {
 		this.infoMap_.focusTypes(typeIds, true /* activeConnectionsOnly */);
 	}
 
+	handleActiveOverlayChange(overlay) {}
+
 	resetActives() {
 		this.infoMap_.setIgnoreHoverChanges(false);
 		this.infoMap_.resetFocus();

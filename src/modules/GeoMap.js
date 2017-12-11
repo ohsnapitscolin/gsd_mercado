@@ -10,12 +10,15 @@ import 'mapbox-gl/dist/svg/mapboxgl-ctrl-zoom-in.svg';
 import 'mapbox-gl/dist/svg/mapboxgl-ctrl-zoom-out.svg';
 
 import GeoMapHover from './GeoMapHover.js';
+import OverlayData from './OverlayData.js';
+import OverlayLabel from './OverlayLabel.js';
 
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoib2hzbmFwaXRzY29saW4iLCJhIjoiY2o3bzkxZ2d1M2ZvajJ4bHh3NTdoMGVzOSJ9.ui98APpgyALQli44gDtXxg";
 
 const GeoNodeClassEnum = {
   POINTS: 'points',
-  GEO_PATH: 'geo_path'
+  GEO_PATH: 'geo_path',
+  DELEGACION: 'delegacion'
 };
 
 const GeoNodeTypeEnum = {
@@ -33,12 +36,18 @@ class GeoMap extends Component {
     this.map_ = null;
     this.svg_ = null;
     this.pathGroups_ = [];
+    this.overlayGroups_ = [];
 
     this.mapHover_ = null;
     this.moveCounter_ = 0;
 
     this.importCompletedPromise_ = null;
 
+    this.state = {
+      activeOverlay: null
+    }
+
+    this.overlays_ = new Map();
     this.geoNodes_ = new Map();
   }
 
@@ -49,15 +58,38 @@ class GeoMap extends Component {
       const geoJson = geoJsons[i];
       importPromises.push(this.importGeoJson(geoJson.file, geoJson.type));
     }
+    const overlays = require('../resources/overlays.json');
+    this.parseOverlays(overlays);
     return Promise.all(importPromises);
+  }
+
+  parseOverlays(overlays) {
+    for (let i = 0; i < overlays.length; i++) {
+      const overlayObject = overlays[i];
+      this.overlays_.set(
+          overlayObject.property, new OverlayData(overlayObject));
+    }
   }
 
   importGeoJson(file, type) {
     return import(`../resources/geojson/${file}.json`).then((geojson) => {
       const className = type;
+      let geoPath;
       switch(className) {
+        case GeoNodeClassEnum.DELEGACION:
+          geoPath = this.createDelegacion(geojson, className);
+          geoPath.each((path, i) => {
+            const geoNode = new GeoNode(
+              path.properties.geojsonId,
+              GeoNodeTypeEnum.PATH,
+              this.getPathCoordinates(path) /* this.coordinates */,
+              path);
+            this.geoNodes_.set(geoNode.getGeoId(), geoNode);
+          });
+          this.overlayGroups_[className] = geoPath;
+          break;
         case GeoNodeClassEnum.GEO_PATH:
-          const geoPath = this.createGeoPath(geojson, className);
+          geoPath = this.createGeoPath(geojson, className);
           geoPath.each((path, i) => {
             const geoNode = new GeoNode(
               path.properties.geojsonId,
@@ -139,6 +171,56 @@ class GeoMap extends Component {
           .on('mouseout', function() {$(this).removeClass("hovered") });
   }
 
+  createDelegacion(geojson, className) {
+    return this.svg_
+      .append('g')
+      .selectAll("path")
+        .data(geojson.features)
+        .enter().append("path")
+          .attr("d", this.path_)
+          .attr('class', `${className}`)
+          .attr('id', (d) => { return 'delegacion-' + d.properties.POB1; })
+          .on('mouseover', function(d) {
+            $(this).addClass("hovered")
+            // const g = d3.select('svg'); // The node
+            // // The class is used to remove the additional text later
+            // const info = g.append('text')
+            //    .classed('info', true)
+            //    .attr('x', 10)
+            //    .attr('y', 10)
+            //    .text(d.properties.delegacion);
+          })
+          .on('mouseout', function() {
+            $(this).removeClass("hovered")
+            // d3.select('svg').select('text.info').remove();
+          });
+  }
+
+  updateOverlays(property) {
+    const overlayData = this.overlays_.get(property);
+    const thisGeoMap = this;
+
+    if (!overlayData) {
+      for (let path in this.overlayGroups_) {
+        this.overlayGroups_[path].each(function(d) {
+          thisGeoMap.removeActivePath($(this));
+        });
+      }
+      this.setState({ activeOverlay: null });
+      return;
+    }
+
+    for (let path in this.overlayGroups_) {
+      this.overlayGroups_[path].each(function(d) {
+      thisGeoMap.setActivePath($(this))
+        d3.select(this).style("fill", function(d) {
+          return overlayData.getColor(d.properties[property]);
+        });
+      });
+    }
+    this.setState({ activeOverlay: property });
+  }
+
   createMap() {
     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
@@ -152,13 +234,13 @@ class GeoMap extends Component {
     // this.map_.on("viewreset", () => { this.updatePaths(); });
     this.map_.on("move", () => { this.updateActivePaths(); });
     this.map_.on("moveend", () => { this.updatePaths(); });
-    // this.map_.on("movestart", () => {
-    //   this.svg_.classed("hidden", true);
-    // });
-    // this.map_.on("moveend", () => {
-    //   this.svg_.classed("hidden", false);
-    //   this.updatePaths();
-    // });
+
+    this.map_.on("movestart", () => {
+      this.hideOverlays("hidden", true);
+    });
+    this.map_.on("moveend", () => {
+      this.showOverlays();
+    });
 
     // this.map_.on("move", () => {
     //   console.log(this.moveCounter_);
@@ -193,6 +275,9 @@ class GeoMap extends Component {
     for (let path in this.pathGroups_) {
       this.pathGroups_[path].attr("d", this.path_);
     }
+    for (let path in this.overlayGroups_) {
+      this.overlayGroups_[path].attr("d", this.path_);
+    }
   }
 
   updateActivePaths() {
@@ -202,6 +287,27 @@ class GeoMap extends Component {
         if (!$(this).hasClass("hidden")) {
           d3.select(this).attr("d", thisGeoMap.path_);
         }
+      });
+    }
+    // for (let path in this.overlayGroups_) {
+    //   this.overlayGroups_[path].attr("d", this.path_);
+    // }
+  }
+
+  hideOverlays() {
+    const thisGeoMap = this;
+    for (var path in this.overlayGroups_) {
+      this.overlayGroups_[path].attr("class", function(d) {
+        return thisGeoMap.hidePath($(this));
+      });
+    }
+  }
+
+  showOverlays() {
+    const thisGeoMap = this;
+    for (var path in this.overlayGroups_) {
+      this.overlayGroups_[path].attr("class", function(d) {
+        return thisGeoMap.showPath($(this));
       });
     }
   }
@@ -372,6 +478,16 @@ class GeoMap extends Component {
     return $path.attr('class');
   }
 
+  setActivePath($path) {
+    $path.addClass('active');
+    return $path.attr('class');
+  }
+
+  removeActivePath($path) {
+    $path.removeClass('active');
+    return $path.attr('class');
+  }
+
   resetFocus() {
     $(".geo_marker").each(function() {
       $(this).removeClass('hovered');
@@ -399,6 +515,8 @@ class GeoMap extends Component {
             this.contentManager_.clickNode(nodeId);
           }}
           ref = {(node) => { this.mapHover_ = node; }}/>
+        <OverlayLabel overlayData={
+            this.overlays_.get(this.state.activeOverlay)}/>
         <div id="geo_mapbox"/>
       </div>
     );
