@@ -220,11 +220,24 @@ svg {
 }
 
 .info_marker {
+  text-align: center;
   padding: 5px;
   color: black;
-  background-color: lightgray;
   max-width: 100px;
   overflow-x: hidden;
+}
+
+.info_marker_image {
+  width: 80px;
+  transition: all .1s ease-in-out
+}
+
+.info_marker_text {
+  margin-top: 0px;
+}
+
+.info_marker_image:hover {
+  transform: scale(1.25)
 }
 
 .info_marker:hover {

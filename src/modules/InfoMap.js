@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import * as mapboxgl from 'mapbox-gl';
 
+import { ResourceStateEnum } from './ContentManager.js';
 
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoib2hzbmFwaXRzY29saW4iLCJhIjoiY2o3bzkxZ2d1M2ZvajJ4bHh3NTdoMGVzOSJ9.ui98APpgyALQli44gDtXxg";
 
@@ -24,31 +25,47 @@ class InfoMap extends Component {
     this.graph_ = require('../resources/graph.json');
     console.log(this.graph_);
 
-    this.maxWidth_ = -1;
-    this.maxWidthLevel_ = -1;
-    for (let i = 0; i < this.graph_.levels.length; i++) {
-      let level = this.graph_.levels[i];
-      if (level.nodes.length > this.maxWidthLevel_) {
-        this.maxWidth_ = level.nodes.length;
-        this.maxWidthLevel_ = i;
-      }
-    }
+    this.imageMap_ = new Map();
+    this.loadResourcesPromise_ = this.loadResources();
 
     this.focusedTypes_ = [];
+  }
+
+  loadResources() {
+    let resourcePromises = [];
+    resourcePromises.push(this.importImage("background", "background.png"));
+    for (let i = 0; i < this.graph_.length; i++) {
+      resourcePromises.push(this.importImage(
+        this.graph_[i].image, this.graph_[i].image));
+    }
+    return Promise.all(resourcePromises);
+  }
+
+  importImage(id, imageName) {
+    return import(`../resources/images/graph/${imageName}`)
+        .then((image) => {
+          this.imageMap_.set(id, image);
+        }, (e) => {
+          this.imageMap_.set(id, null);
+        });
   }
 
   setIgnoreHoverChanges(ignoreHoverChanges) {
     this.ignoreHoverChanges_ = ignoreHoverChanges;
   }
 
+  addBackground() {
+    var img = document.createElement('img');
+    $(img).attr('class', 'info_background_image');
+    $(img).attr('src', this.imageMap_.get("background"));
+
+    new mapboxgl.Marker(img)
+      .setLngLat([0, 0])
+      .addTo(this.map_);
+  }
+
   addPoints(node, color) {
-    var el = document.createElement('div');
-
-    $(el).attr('id', 'type-' + node.getTypeId());
-    $(el).attr('class', 'info_marker');
-
-    const id = node.getTypeId();
-    $(el).append(id);
+    const el = this.createNode(node);
 
     const thisInfoMap = this;
     $(el).hover(function() {
@@ -66,6 +83,25 @@ class InfoMap extends Component {
     new mapboxgl.Marker(el)
     .setLngLat(node.getCoordinates())
     .addTo(this.map_);
+  }
+
+  createNode(node) {
+    var el = document.createElement('div');
+    $(el).attr('id', 'type-' + node.getTypeId());
+    $(el).attr('class', 'info_marker');
+
+    var img = document.createElement('img');
+    $(img).attr('class', 'info_marker_image');
+    $(img).attr('src', this.imageMap_.get(node.getImage()));
+
+    var text = document.createElement('p');
+    $(text).attr('class', 'info_marker_text');
+    $(text).append(node.getName());
+
+    $(el).prepend(img);
+    $(el).append(text);
+
+    return el;
   }
 
   createGeoNodes(geojson, className) {
@@ -155,9 +191,9 @@ class InfoMap extends Component {
 
       const element = $("#type-" + typeId);
       element.addClass('hovered');
-      element.css({
-        'background-color': (type && type.getCategory()) || 'red'
-      });
+      // element.css({
+      //   'background-color': (type && type.getCategory()) || 'red'
+      // });
     }
   }
 
@@ -188,14 +224,14 @@ class InfoMap extends Component {
     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
     const bounds = [
-        [-.5, -1], // Southwest coordinates
-        [.5, .5]  // Northeast coordinates
+        [-5, -5], // Southwest coordinates
+        [5, 5]  // Northeast coordinates
     ];
 
     this.map_ = new mapboxgl.Map({
       container: 'info_mapbox', // container id
       style: 'mapbox://styles/mapbox/light-v9',
-      center: [0, -.15],
+      center: [0, 0],
       zoom: 10,
       maxBounds: bounds
     });
@@ -227,9 +263,12 @@ class InfoMap extends Component {
   // React component management
 
   componentDidMount() {
-    this.createMap();
-    this.addGraph();
-    this.createGeoLines();
+    this.loadResourcesPromise_.then(() => {
+      this.createMap();
+      this.addBackground();
+      this.addGraph();
+      this.createGeoLines();
+    });
     // this.importGraph().then(() => {
 
     // });
@@ -239,26 +278,16 @@ class InfoMap extends Component {
     this.graphNodes_ = new Map();
     const width = .07;
     const height = .05;
-    for (let i = 0; i < this.graph_.levels.length; i++) {
-      const level = this.graph_.levels[i];
-      const levelWidth = level.nodes.length;
-      const spreadLevel = level.spread;
-      console.log(spreadLevel);
-      const offset =
-          (levelWidth - 1) * width * spreadLevel / 2 * -1;
-      for (let j = 0; j < level.nodes.length; j++) {
-        const node = level.nodes[j];
-        if (!node.id || node.id < 0) {
-          continue;
-        }
-        const coordinates = [
-            offset + (j * width * spreadLevel),
-            i * height * 1.5 * -1];
-        const nodeObject =
-            new GraphNode(node.id, coordinates, node.connections);
-        this.graphNodes_.set(node.id, nodeObject);
-        this.addPoints(nodeObject);
-      }
+    for (let i = 0; i < this.graph_.length; i++) {
+      const node = this.graph_[i];
+      const nodeObject = new GraphNode(
+        node.id,
+        node.name,
+        node.coordinates,
+        node.connections,
+        node.image);
+      this.graphNodes_.set(node.id, nodeObject);
+      this.addPoints(nodeObject);
     }
   }
 
@@ -335,10 +364,20 @@ class InfoMap extends Component {
 }
 
 class GraphNode {
-  constructor(typeId, coordinates, connections) {
+  constructor(typeId, name, coordinates, connections, image) {
+    this.image_ = image;
+    this.name_ = name;
     this.typeId_ = typeId;
     this.coordinates_ = coordinates;
     this.connections_ = connections;
+  }
+
+  getImage() {
+    return this.image_;
+  }
+
+  getName() {
+    return this.name_;
   }
 
   getTypeId() {

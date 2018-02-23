@@ -9,7 +9,7 @@
 			"id": "test_chapter_1",
 			"geoId": "test_geo_5",
 			"typeId": "individual",
-			"text": "Here's a text example! With a {type=link info=https://www.google.com text=link}! {type=newline info=5} And maybe an image? {type=image info=test_image1.jpg} and maybe a video? {type=video info=https://www.youtube.com/embed/kJQP7kiw5Fk}",
+			"text": "Here's a text example! With a {type=link info=https://www.google.com text=link}! {type=newline info=5} And maybe an image? {type=image info=test_image1.jpg} {type=image info=test_image1.jpg} and maybe a video? {type=video info=https://www.youtube.com/embed/kJQP7kiw5Fk}",
 			"decisions": [
 				{
 					"chapterId": "test_chapter_2",

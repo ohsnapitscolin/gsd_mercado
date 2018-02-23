@@ -1,0 +1,125 @@
+{
+	"levels": [
+		{
+			"spread": 2,
+			"nodes":
+			[
+				{ "id": "tlatelolco", "connections": ["tlatelolco_electric_car"] },
+				{ "id": "formal_commercial", "connections": ["chatarrero_perifoneo", "carrero_informal_collector"] },
+				{ "id": "informal_commercial", "connections": ["montones", "chacharrero"] },
+				{ "id": "individual", "connections": [
+					"formal_street_sweeper",
+					"chatarrero_perifoneo",
+					"mercado_de_trueque",
+					"chacharrero",
+					"small_recollection_center",
+					"trash_truck" ] },
+				{ "id":  "public_park", "connections": ["electric_car", "formal_street_sweeper"] }
+			]
+		},
+		{
+			"spread": 1.8,
+			"nodes":
+			[
+				{ "id": "tlatelolco_electric_car", "connections": ["tlatelolco_transfer_station"] },
+				{ "id": "montones", "connections": ["carrero_informal_collector", "pepenadores", "trash_truck"] },
+				{ "id": "chatarrero_perifoneo", "connections": ["small_recollection_center"] },
+				{ "id": "formal_street_sweeper", "connections": ["trash_truck"] },
+				{ "id": "electric_car", "connections": ["formal_street_sweeper", "trash_truck"] },
+				{}
+			]
+		},
+		{
+			"spread": 1.5,
+			"nodes":
+			[
+				{},
+				{ "id": "carrero_informal_collector", "connections": ["small_recollection_center"] },
+				{ "id": "pepenadores", "connections": ["chacharrero", "small_recollection_center", "tianguis"] },
+				{},
+				{ "id": "barrendero_cart_storage", "connections": ["formal_street_sweeper"] },
+				{ "id": "mercado_de_trueque", "connections": [
+					"metal_medium_recollection_center",
+					"paper_medium_recollection_center",
+					"plastic_medium_recollection_center"] }
+			]
+		},
+		{
+			"spread": 1,
+			"nodes":
+			[
+				{},
+				{},
+				{ "id": "chacharrero", "connections": ["tianguis"] },
+				{},
+				{},
+				{ "id": "small_recollection_center", "connections": [
+					"metal_medium_recollection_center",
+					"paper_medium_recollection_center",
+					"plastic_medium_recollection_center",
+					"plastic_large_recollection_center",
+					"paper_large_recollection_center"] }
+			]
+		},
+		{
+			"spread": 1,
+			"nodes":
+			[
+				{ "id": "tianguis", "connections": [] },
+				{ "id": "trash_truck_storage", "connections": ["trash_truck"] },
+				{ "id": "trash_truck", "connections": [
+					"chacharrero",
+					"small_recollection_center",
+					"paper_nomadic_buyer",
+					"pet_nomadic_buyer",
+					"other_plastic_nomadic_buyer",
+					"metal_nomadic_buyer",
+					"transfer_station"] },
+				{},
+				{}
+			]
+		},
+		{
+			"spread": 1.5,
+			"nodes":
+			[
+				{ "id": "tlatelolco_transfer_station", "connections": ["transfer_station"] },
+				{},
+				{ "id": "paper_nomadic_buyer", "connections": [] },
+				{ "id": "pet_nomadic_buyer", "connections": ["plastic_large_recollection_center"] },
+				{ "id": "other_plastic_nomadic_buyer", "connections": ["plastic_medium_recollection_center"] },
+				{ "id": "metal_nomadic_buyer", "connections": [] },
+				{}
+			]
+		},
+		{
+			"spread": 1.7,
+			"nodes":
+			[
+				{},
+				{ "id": "transfer_station", "connections": ["plastic_large_recollection_center"] },
+				{},
+				{},
+				{ "id": "paper_medium_recollection_center", "connections": ["paper_large_recollection_center"] },
+				{ "id": "plastic_medium_recollection_center", "connections": ["plastic_large_recollection_center"] },
+				{ "id": "metal_medium_recollection_center", "connections": ["foundry_ferrous", "foundry_non_ferrous"] }
+			]
+		},
+		{
+			"spread": 1,
+			"nodes":
+			[
+				{},
+				{},
+				{ "id": "plastic_large_recollection_center", "connections": [] },
+				{},
+				{ "id": "paper_large_recollection_center", "connections": [] },
+				{},
+				{},
+				{ "id": "foundry_ferrous", "connections": [] },
+				{},
+				{ "id": "foundry_non_ferrous", "connections": [] }
+			]
+		}
+	]
+}
