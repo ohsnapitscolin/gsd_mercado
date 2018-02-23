@@ -224,15 +224,15 @@ class InfoMap extends Component {
     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
     const bounds = [
-        [-5, -5], // Southwest coordinates
-        [5, 5]  // Northeast coordinates
+        [-3, -3], // Southwest coordinates
+        [3, 3]  // Northeast coordinates
     ];
 
     this.map_ = new mapboxgl.Map({
       container: 'info_mapbox', // container id
       style: 'mapbox://styles/mapbox/light-v9',
       center: [0, 0],
-      zoom: 10,
+      zoom: 8,
       maxBounds: bounds
     });
 

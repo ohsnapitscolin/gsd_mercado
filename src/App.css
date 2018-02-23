@@ -87,10 +87,15 @@ svg {
 }
 
 .lines {
+  z-index: 2;
   fill: none;
   stroke: gray;
   stroke-width: 2px;
   vector-effect: non-scaling-stroke;
+}
+
+.info_map svg {
+  z-index: 2;
 }
 
 .info {
@@ -143,10 +148,9 @@ svg {
 }
 
 .lines.animated {
-  z-index: 100;
   stroke-dasharray: 250, 10;
   stroke-dashoffset: 1000;
-  stroke: white;
+  stroke: #e94141;
   animation-name: dash;
   animation-duration: 8s;
   animation-timing-function: linear;
@@ -225,11 +229,16 @@ svg {
   color: black;
   max-width: 100px;
   overflow-x: hidden;
+  z-index: 3;
 }
 
 .info_marker_image {
   width: 80px;
   transition: all .1s ease-in-out
+}
+
+.info_background_image {
+  z-index: 1;
 }
 
 .info_marker_text {
